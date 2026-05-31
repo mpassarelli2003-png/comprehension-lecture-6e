@@ -24,64 +24,18 @@ Au début, les passants lisaient l'affiche avec curiosité sans oser participer.
   ]
 };
 
-const wordHelp = {
-  qui: "Je cherche une personne, un personnage ou un animal.",
-  où: "Je cherche un lieu ou un endroit.",
-  quand: "Je cherche un moment, une date, une saison ou une époque.",
-  pourquoi: "Je cherche une raison ou une cause.",
-  comment: "Je cherche une manière, une méthode ou une façon.",
-  combien: "Je cherche un nombre, une quantité ou une durée.",
-  quoi: "Je cherche une action, une idée ou un objet."
-};
+const wordHelp = { qui: "Je cherche une personne, un personnage ou un animal.", où: "Je cherche un lieu ou un endroit.", quand: "Je cherche un moment, une date, une saison ou une époque.", pourquoi: "Je cherche une raison ou une cause.", comment: "Je cherche une manière, une méthode ou une façon.", combien: "Je cherche un nombre, une quantité ou une durée.", quoi: "Je cherche une action, une idée ou un objet." };
 
 const proofTools = {
-  explicite: {
-    label: "Information explicite",
-    className: "blue",
-    title: "C'est écrit clairement dans le texte.",
-    text: "Utilise cet outil quand la réponse est directement écrite. Tu peux presque pointer la phrase avec ton doigt. Exemple : le nom d'un personnage, un lieu, une action ou un objet mentionné clairement.",
-    question: "Je me demande : Est-ce que je peux copier une partie du texte pour répondre ?"
-  },
-  inference: {
-    label: "Indice pour inférence",
-    className: "yellow",
-    title: "Je dois lire entre les lignes.",
-    text: "Utilise cet outil quand la réponse n'est pas écrite mot pour mot. Tu dois prendre des indices dans le texte et les relier avec ce que tu sais déjà. C'est comme faire une petite déduction de détective.",
-    question: "Je me demande : Qu'est-ce que le texte me fait comprendre sans le dire directement ?"
-  },
-  reaction: {
-    label: "Exemple pour réagir",
-    className: "pink",
-    title: "Je donne mon avis avec une preuve.",
-    text: "Utilise cet outil quand la question te demande ce que tu penses, ce que tu ressens ou comment tu aurais réagi. Tu peux parler de toi, mais tu dois choisir un exemple du texte pour appuyer ton idée.",
-    question: "Je me demande : Quel passage du texte explique ma réaction ?"
-  },
-  important: {
-    label: "Idée importante",
-    className: "green",
-    title: "C'est une idée essentielle du texte.",
-    text: "Utilise cet outil pour surligner une information qui aide à comprendre le message, le problème, la solution, le changement d'un personnage ou l'idée principale. Ce n'est pas un détail inutile.",
-    question: "Je me demande : Si j'enlève cette information, est-ce que je comprends moins bien le texte ?"
-  }
+  explicite: { label: "Information explicite", className: "blue", title: "C'est écrit clairement dans le texte.", text: "Utilise cet outil quand la réponse est directement écrite. Tu peux presque pointer la phrase avec ton doigt.", question: "Est-ce que je peux copier une partie du texte pour répondre ?" },
+  inference: { label: "Indice pour inférence", className: "yellow", title: "Je dois lire entre les lignes.", text: "Utilise cet outil quand la réponse n'est pas écrite mot pour mot. Tu dois prendre des indices et faire une petite déduction.", question: "Qu'est-ce que le texte me fait comprendre sans le dire directement ?" },
+  reaction: { label: "Exemple pour réagir", className: "pink", title: "Je donne mon avis avec une preuve.", text: "Utilise cet outil quand la question te demande ce que tu penses, ce que tu ressens ou comment tu aurais réagi.", question: "Quel passage du texte explique ma réaction ?" },
+  important: { label: "Idée importante", className: "green", title: "C'est une idée essentielle du texte.", text: "Utilise cet outil pour surligner une information qui aide à comprendre le message, le problème, la solution ou l'idée principale.", question: "Si j'enlève cette information, est-ce que je comprends moins bien le texte ?" }
 };
 
-function detectQuestionWord(prompt) {
-  const lower = prompt.toLowerCase();
-  if (lower.includes("pourquoi")) return "pourquoi";
-  if (lower.includes("comment")) return "comment";
-  if (lower.includes("combien")) return "combien";
-  if (lower.includes("quand")) return "quand";
-  if (lower.includes("où")) return "où";
-  if (lower.includes("qui")) return "qui";
-  return "quoi";
-}
-
-function starter(type) {
-  if (type === "comprendre") return "Je réponds : ";
-  if (type === "interpreter") return "Je pense que cela veut dire que... Dans le texte, on voit que...";
-  if (type === "reagir") return "J'aurais réagi... parce que... Dans le texte...";
-  return "J'ai apprécié ce récit parce que... Par exemple...";
-}
+function detectQuestionWord(prompt) { const lower = prompt.toLowerCase(); if (lower.includes("pourquoi")) return "pourquoi"; if (lower.includes("comment")) return "comment"; if (lower.includes("combien")) return "combien"; if (lower.includes("quand")) return "quand"; if (lower.includes("où")) return "où"; if (lower.includes("qui")) return "qui"; return "quoi"; }
+function starter(type) { if (type === "comprendre") return "Dans le texte, on apprend que..."; if (type === "interpreter") return "Je pense que cela veut dire que... Dans le texte, un indice montre que..."; if (type === "reagir") return "Je réagirais... parce que... Dans le texte..."; return "J'ai apprécié... parce que... Par exemple..."; }
+function responseTarget(type, word, points) { const base = points >= 2 ? "Réponse développée : idée + preuve + explication." : "Réponse courte, mais complète."; if (type === "reagir") return base + " Tu dois parler de toi ET du texte."; if (type === "apprecier") return base + " Tu dois donner un critère : personnage, message, fin, vocabulaire ou passage."; if (type === "interpreter") return base + " Tu dois expliquer ce que tu comprends avec des indices."; if (word === "pourquoi") return base + " Tu dois donner une raison."; if (word === "comment") return base + " Tu dois expliquer la manière ou les étapes."; return base + " Tu dois répondre exactement à ce qui est demandé."; }
 
 export default function Home() {
   const [view, setView] = useState("home");
@@ -103,100 +57,15 @@ export default function Home() {
   const currentWord = detectQuestionWord(question?.prompt || "");
   const currentProofs = proofs.filter((p) => p.questionId === question?.id);
   const activeTool = proofTools[activeProofTool];
+  const checkKey = (label) => `${question.id}-${label}`;
 
-  function importExercise() {
-    try {
-      const parsed = JSON.parse(adminJson);
-      setExercise(parsed);
-      setView("home");
-      setStep(1);
-      setQIndex(0);
-      setAnswers({});
-      setProofs([]);
-      setChecks({});
-    } catch {
-      alert("Le JSON contient une erreur.");
-    }
-  }
+  function importExercise() { try { const parsed = JSON.parse(adminJson); setExercise(parsed); setView("home"); setStep(1); setQIndex(0); setAnswers({}); setProofs([]); setChecks({}); } catch { alert("Le JSON contient une erreur."); } }
+  function getSelection() { setSelected(window.getSelection()?.toString() || ""); }
+  function addProof(kind) { if (!selected.trim()) return; setProofs([...proofs, { id: Date.now(), questionId: question.id, text: selected.trim(), kind }]); setSelected(""); }
 
-  function getSelection() {
-    setSelected(window.getSelection()?.toString() || "");
-  }
+  if (view === "home") return <main className="page"><section className="card"><h1>Lecture 6e année Québec</h1><p>Application de pratique guidée : lire, comprendre la question, trouver une preuve dans le texte, répondre et s'auto-corriger.</p><div className="grid three"><button className="blue" onClick={() => setView("student")}>Je pratique</button><button className="green" onClick={() => setView("teacher")}>Espace enseignant</button><button className="violet" onClick={() => setView("progress")}>Mes progrès</button></div></section></main>;
+  if (view === "teacher") return <main className="page"><section className="card"><button onClick={() => setView("home")}>Accueil</button><h1>Espace enseignant</h1><p>Colle ici un exercice en format JSON. Utilise seulement des textes dont tu as les droits.</p><textarea style={{minHeight:520}} value={adminJson} onChange={(e) => setAdminJson(e.target.value)} /><button className="green" onClick={importExercise}>Importer cet exercice</button></section></main>;
+  if (view === "progress") return <main className="page"><section className="card"><button onClick={() => setView("home")}>Accueil</button><h1>Mes progrès</h1>{exercise.questions.map((q, i) => <div className="card" key={q.id}><b>Question {i + 1} : {q.prompt}</b><p>Réponse : {answers[q.id] || "Non répondue"}</p><p>Preuves : {proofs.filter((p) => p.questionId === q.id).length}</p></div>)}</section></main>;
 
-  function addProof(kind) {
-    if (!selected.trim()) return;
-    setProofs([...proofs, { id: Date.now(), questionId: question.id, text: selected.trim(), kind }]);
-    setSelected("");
-  }
-
-  if (view === "home") return (
-    <main className="page"><section className="card">
-      <h1>Lecture 6e année Québec</h1>
-      <p>Application de pratique guidée : lire, comprendre la question, trouver une preuve dans le texte, répondre et s'auto-corriger.</p>
-      <div className="grid three">
-        <button className="blue" onClick={() => setView("student")}>Je pratique</button>
-        <button className="green" onClick={() => setView("teacher")}>Espace enseignant</button>
-        <button className="violet" onClick={() => setView("progress")}>Mes progrès</button>
-      </div>
-    </section></main>
-  );
-
-  if (view === "teacher") return (
-    <main className="page"><section className="card">
-      <button onClick={() => setView("home")}>Accueil</button>
-      <h1>Espace enseignant</h1>
-      <p>Colle ici un exercice en format JSON. Utilise seulement des textes dont tu as les droits.</p>
-      <textarea style={{minHeight:520}} value={adminJson} onChange={(e) => setAdminJson(e.target.value)} />
-      <button className="green" onClick={importExercise}>Importer cet exercice</button>
-    </section></main>
-  );
-
-  if (view === "progress") return (
-    <main className="page"><section className="card">
-      <button onClick={() => setView("home")}>Accueil</button>
-      <h1>Mes progrès</h1>
-      {exercise.questions.map((q, i) => <div className="card" key={q.id}>
-        <b>Question {i + 1} : {q.prompt}</b>
-        <p>Réponse : {answers[q.id] || "Non répondue"}</p>
-        <p>Preuves : {proofs.filter((p) => p.questionId === q.id).length}</p>
-      </div>)}
-    </section></main>
-  );
-
-  return (
-    <main className="page">
-      <div className="card">
-        <button onClick={() => setView("home")}>Accueil</button>
-        {[1,2,3,4,5,6].map((n) => <button key={n} className={step === n ? "blue" : ""} onClick={() => setStep(n)}>Étape {n}</button>)}
-      </div>
-      <div className="grid cols">
-        <section className="card">
-          <h1>{exercise.title}</h1>
-          <p><b>{exercise.level}</b> - Texte {exercise.textType}</p>
-          <p className="yellow">Intention : {exercise.intention}</p>
-          <button onClick={() => setBig(!big)}>Gros texte</button>
-          <button onClick={() => setSpaced(!spaced)}>Espacement</button>
-          <div onMouseUp={getSelection} className={`reader ${big ? "big" : ""} ${spaced ? "spaced" : ""}`}>
-            {paragraphs.map((p, i) => <div className="para" key={i}>
-              <p>{p}</p>
-              {step === 2 && <input value={notes[i] || ""} onChange={(e) => setNotes({...notes, [i]: e.target.value})} placeholder="Je résume ce paragraphe en quelques mots..." />}
-            </div>)}
-          </div>
-        </section>
-        <section className="card">
-          {step === 1 && <div><h2>Étape 1 — Avant de lire</h2><ul className="list"><li>Je lis le titre.</li><li>Je prédis le sujet.</li><li>J'active ce que je connais déjà.</li><li>Je lis l'intention de lecture.</li></ul></div>}
-          {step === 2 && <div><h2>Étape 2 — Pendant la lecture</h2><p>Lis un paragraphe à la fois et écris une idée courte.</p><ul className="list"><li>Je relis si je bloque.</li><li>Je regarde autour d'un mot difficile.</li><li>Je repère les idées importantes.</li></ul></div>}
-          {step >= 3 && <div>
-            <div className="card"><b>Question {qIndex + 1} / {exercise.questions.length}</b><h2>{question.prompt}</h2><p>{question.type} - {question.points} point(s)</p></div>
-            <button disabled={qIndex === 0} onClick={() => setQIndex(Math.max(0, qIndex - 1))}>Question précédente</button>
-            <button disabled={qIndex === exercise.questions.length - 1} onClick={() => setQIndex(Math.min(exercise.questions.length - 1, qIndex + 1))}>Question suivante</button>
-            {step === 3 && <div><h2>Étape 3 — Je comprends la question</h2><p className="yellow">Mot-question : {currentWord}</p><p>{wordHelp[currentWord]}</p><p><b>Ma réponse à cette question</b></p><textarea value={answers[question.id] || ""} onChange={(e) => setAnswers({...answers, [question.id]: e.target.value})} placeholder="Écris ici ta première réponse. Tu pourras l'améliorer aux étapes 4 et 5 avec des preuves du texte." /><p className="yellow">Conseil : réponds avec les mots de la question, puis retourne au texte pour trouver une preuve.</p></div>}
-            {step === 4 && <div><h2>Étape 4 — Je trouve mes preuves</h2><p>Surligneur : sélectionne un bout du texte à gauche, choisis l'outil qui convient, puis appuie sur Surligner.</p><p>Sélection actuelle : <b>{selected || "Aucun texte sélectionné"}</b></p><div>{Object.entries(proofTools).map(([key, tool]) => <button key={key} className={activeProofTool === key ? tool.className : ""} onClick={() => setActiveProofTool(key)}>{tool.label}</button>)}</div><div className={`card ${activeTool.className}`}><h3>{activeTool.title}</h3><p>{activeTool.text}</p><p><b>Question à me poser :</b> {activeTool.question}</p></div><button className={activeTool.className} onClick={() => addProof(activeProofTool)}>Surligner avec cet outil</button>{currentProofs.map((p) => <p className={proofTools[p.kind]?.className || "yellow"} key={p.id}><b>{proofTools[p.kind]?.label || p.kind} :</b> {p.text}</p>)}</div>}
-            {step === 5 && <div><h2>Étape 5 — J'écris ma réponse</h2><button className="green" onClick={() => setAnswers({...answers, [question.id]: starter(question.type)})}>Insérer un début de phrase</button><textarea value={answers[question.id] || ""} onChange={(e) => setAnswers({...answers, [question.id]: e.target.value})} placeholder="Écris ta réponse complète ici..." /><details><summary>Voir les indices</summary><ol>{question.hints.map((h) => <li key={h}>{h}</li>)}</ol></details></div>}
-            {step === 6 && <div><h2>Étape 6 — Je vérifie</h2>{["J'ai répondu à la question.","J'ai utilisé une preuve du texte.","Ma réponse est complète.","Mon explication est claire.","J'ai relu ma réponse."].map((c) => <label key={c} style={{display:"block", margin:"8px"}}><input type="checkbox" checked={!!checks[c]} onChange={(e) => setChecks({...checks, [c]: e.target.checked})} /> {c}</label>)}<p><b>Réponse actuelle :</b></p><p>{answers[question.id] || "Aucune réponse."}</p><details><summary>Corrigé enseignant</summary><p>{question.expectedAnswer}</p></details></div>}
-          </div>}
-        </section>
-      </div>
-    </main>
-  );
+  return <main className="page"><div className="card"><button onClick={() => setView("home")}>Accueil</button>{[1,2,3,4,5,6].map((n) => <button key={n} className={step === n ? "blue" : ""} onClick={() => setStep(n)}>Étape {n}</button>)}</div><div className="grid cols"><section className="card"><h1>{exercise.title}</h1><p><b>{exercise.level}</b> - Texte {exercise.textType}</p><p className="yellow">Intention : {exercise.intention}</p><button onClick={() => setBig(!big)}>Gros texte</button><button onClick={() => setSpaced(!spaced)}>Espacement</button><div onMouseUp={getSelection} className={`reader ${big ? "big" : ""} ${spaced ? "spaced" : ""}`}>{paragraphs.map((p, i) => <div className="para" key={i}><p>{p}</p>{step === 2 && <input value={notes[i] || ""} onChange={(e) => setNotes({...notes, [i]: e.target.value})} placeholder="Je résume ce paragraphe en quelques mots..." />}</div>)}</div></section><section className="card">{step === 1 && <div><h2>Étape 1 — Avant de lire</h2><ul className="list"><li>Je lis le titre.</li><li>Je prédis le sujet.</li><li>J'active ce que je connais déjà.</li><li>Je lis l'intention de lecture.</li></ul></div>}{step === 2 && <div><h2>Étape 2 — Pendant la lecture</h2><p>Lis un paragraphe à la fois et écris une idée courte.</p><ul className="list"><li>Je relis si je bloque.</li><li>Je regarde autour d'un mot difficile.</li><li>Je repère les idées importantes.</li></ul></div>}{step >= 3 && <div><div className="card"><b>Question {qIndex + 1} / {exercise.questions.length}</b><h2>{question.prompt}</h2><p>{question.type} - {question.points} point(s)</p></div><button disabled={qIndex === 0} onClick={() => setQIndex(Math.max(0, qIndex - 1))}>Question précédente</button><button disabled={qIndex === exercise.questions.length - 1} onClick={() => setQIndex(Math.min(exercise.questions.length - 1, qIndex + 1))}>Question suivante</button>{step === 3 && <div><h2>Étape 3 — Je comprends la question</h2><p className="yellow">Mot-question : {currentWord}</p><p>{wordHelp[currentWord]}</p><p><b>Ma réponse à cette question</b></p><textarea value={answers[question.id] || ""} onChange={(e) => setAnswers({...answers, [question.id]: e.target.value})} placeholder="Écris ici ta première réponse. Tu pourras l'améliorer aux étapes 4 et 5 avec des preuves du texte." /><p className="yellow">Conseil : réponds avec les mots de la question, puis retourne au texte pour trouver une preuve.</p></div>}{step === 4 && <div><h2>Étape 4 — Je trouve mes preuves</h2><p>Surligneur : sélectionne un bout du texte à gauche, choisis l'outil qui convient, puis appuie sur Surligner.</p><p>Sélection actuelle : <b>{selected || "Aucun texte sélectionné"}</b></p><div>{Object.entries(proofTools).map(([key, tool]) => <button key={key} className={activeProofTool === key ? tool.className : ""} onClick={() => setActiveProofTool(key)}>{tool.label}</button>)}</div><div className={`card ${activeTool.className}`}><h3>{activeTool.title}</h3><p>{activeTool.text}</p><p><b>Question à me poser :</b> {activeTool.question}</p></div><button className={activeTool.className} onClick={() => addProof(activeProofTool)}>Surligner avec cet outil</button>{currentProofs.map((p) => <p className={proofTools[p.kind]?.className || "yellow"} key={p.id}><b>{proofTools[p.kind]?.label || p.kind} :</b> {p.text}</p>)}</div>}{step === 5 && <div><h2>Étape 5 — J'écris et j'améliore ma réponse</h2><div className="card yellow"><b>Ce que la question demande :</b><p>Mot-question : {currentWord}. {wordHelp[currentWord]}</p><p>{responseTarget(question.type, currentWord, question.points)}</p></div><div className="card"><b>Ma recette de réponse complète</b><ol><li>Je réponds clairement à la question.</li><li>J'ajoute une preuve ou un indice du texte.</li><li>J'explique mon idée avec mes mots.</li></ol></div><div className="card"><b>Mes preuves de l'étape 4</b>{currentProofs.length === 0 ? <p>Aucune preuve choisie. Retourne à l'étape 4 si tu veux t'aider.</p> : currentProofs.map((p) => <p className={proofTools[p.kind]?.className || "yellow"} key={p.id}><b>{proofTools[p.kind]?.label || p.kind} :</b> {p.text}</p>)}</div><div className="card"><b>Avant d'écrire, je coche :</b>{["Je comprends ce que la question demande.","J'ai au moins une preuve ou un indice.","Je sais si je dois comprendre, inférer, réagir ou apprécier.","Je vais écrire une phrase complète."].map((c) => <label key={c} style={{display:"block", margin:"8px"}}><input type="checkbox" checked={!!checks[checkKey(c)]} onChange={(e) => setChecks({...checks, [checkKey(c)]: e.target.checked})} /> {c}</label>)}</div><button className="green" onClick={() => setAnswers({...answers, [question.id]: starter(question.type)})}>Insérer un début de phrase</button><textarea value={answers[question.id] || ""} onChange={(e) => setAnswers({...answers, [question.id]: e.target.value})} placeholder="Écris ta réponse complète ici. Essaie : réponse + preuve + explication." /><div className="card green"><b>Je relis ma réponse :</b>{["J'ai repris des mots de la question.","Ma réponse répond vraiment à la question.","J'ai utilisé une preuve ou un indice du texte.","J'ai expliqué mon idée.","Je n'ai pas seulement écrit oui, non ou un seul mot."].map((c) => <label key={c} style={{display:"block", margin:"8px"}}><input type="checkbox" checked={!!checks[checkKey(c)]} onChange={(e) => setChecks({...checks, [checkKey(c)]: e.target.checked})} /> {c}</label>)}</div><details><summary>J'ai besoin d'un indice, sans avoir la réponse</summary><ol>{question.hints.map((h) => <li key={h}>{h}</li>)}</ol></details></div>}{step === 6 && <div><h2>Étape 6 — Je vérifie</h2>{["J'ai répondu à la question.","J'ai utilisé une preuve du texte.","Ma réponse est complète.","Mon explication est claire.","J'ai relu ma réponse."].map((c) => <label key={c} style={{display:"block", margin:"8px"}}><input type="checkbox" checked={!!checks[checkKey(c)]} onChange={(e) => setChecks({...checks, [checkKey(c)]: e.target.checked})} /> {c}</label>)}<p><b>Réponse actuelle :</b></p><p>{answers[question.id] || "Aucune réponse."}</p><details><summary>Corrigé enseignant</summary><p>{question.expectedAnswer}</p></details></div>}</div>}</section></div></main>;
 }
