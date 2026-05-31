@@ -3,13 +3,67 @@
 import { useMemo, useState } from "react";
 import exercises from "../data/exercises";
 
-function speak(text) {
-  if (typeof window === "undefined" || !window.speechSynthesis) return;
+function getFrenchVoice() {
+  if (typeof window === "undefined" || !window.speechSynthesis) return null;
+  const voices = window.speechSynthesis.getVoices() || [];
+  return voices.find((voice) => voice.lang === "fr-CA")
+    || voices.find((voice) => voice.lang?.toLowerCase().startsWith("fr"))
+    || voices[0]
+    || null;
+}
+
+function splitTextForSpeech(text) {
+  const clean = String(text || "").replace(/\s+/g, " ").trim();
+  if (!clean) return [];
+  const chunks = [];
+  let rest = clean;
+  while (rest.length > 0) {
+    let slice = rest.slice(0, 180);
+    const lastStop = Math.max(slice.lastIndexOf("."), slice.lastIndexOf("!"), slice.lastIndexOf("?"), slice.lastIndexOf(";"), slice.lastIndexOf(","));
+    if (rest.length > 180 && lastStop > 60) slice = slice.slice(0, lastStop + 1);
+    chunks.push(slice.trim());
+    rest = rest.slice(slice.length).trim();
+  }
+  return chunks;
+}
+
+function speak(text, onStatus) {
+  if (typeof window === "undefined" || !window.speechSynthesis || typeof SpeechSynthesisUtterance === "undefined") {
+    onStatus?.("La lecture vocale n’est pas disponible dans ce navigateur.");
+    return;
+  }
+
+  const chunks = splitTextForSpeech(text);
+  if (chunks.length === 0) {
+    onStatus?.("Il n’y a rien à lire.");
+    return;
+  }
+
   window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "fr-CA";
-  utterance.rate = 0.9;
-  window.speechSynthesis.speak(utterance);
+  const voice = getFrenchVoice();
+  let index = 0;
+
+  const readNext = () => {
+    if (index >= chunks.length) {
+      onStatus?.("Lecture terminée.");
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(chunks[index]);
+    utterance.lang = voice?.lang || "fr-CA";
+    utterance.voice = voice;
+    utterance.rate = 0.85;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    utterance.onstart = () => onStatus?.("Lecture en cours...");
+    utterance.onerror = () => onStatus?.("La lecture vocale a été bloquée ou n’est pas disponible. Essaie Chrome et vérifie le son de l’appareil.");
+    utterance.onend = () => {
+      index += 1;
+      setTimeout(readNext, 120);
+    };
+    window.speechSynthesis.speak(utterance);
+  };
+
+  setTimeout(readNext, 50);
 }
 
 export default function AideVocalePage() {
@@ -21,6 +75,18 @@ export default function AideVocalePage() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
+  const [speechStatus, setSpeechStatus] = useState("Lecture vocale prête.");
+
+  function readAloud(text) {
+    speak(text, setSpeechStatus);
+  }
+
+  function stopSpeaking() {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      setSpeechStatus("Lecture arrêtée.");
+    }
+  }
 
   function changeExercise(id) {
     const next = exercises.find((item) => item.id === id) || exercises[0];
@@ -50,11 +116,11 @@ export default function AideVocalePage() {
       const data = await response.json();
       const answer = data.answer || "Je n’ai pas réussi à répondre. Essaie de reformuler ta demande.";
       setHistory([...nextHistory, { role: "assistant", text: answer }]);
-      speak(answer);
+      readAloud(answer);
     } catch (error) {
       const answer = "L’aide IA n’est pas disponible pour le moment.";
       setHistory([...nextHistory, { role: "assistant", text: answer }]);
-      speak(answer);
+      readAloud(answer);
     } finally {
       setLoading(false);
     }
@@ -87,6 +153,9 @@ export default function AideVocalePage() {
         <a href="/">Retour à l’application</a>
         <h1>Aide vocale conversationnelle</h1>
         <p>Cette aide utilise le texte choisi, la question, les indices et les corrigés enseignants. Elle guide l’élève sans donner directement la réponse.</p>
+        <p className="yellow"><b>État vocal :</b> {speechStatus}</p>
+        <button onClick={() => readAloud("Bonjour. La lecture vocale fonctionne. Je peux lire les réponses à voix haute.")}>Tester le son</button>
+        <button onClick={stopSpeaking}>Arrêter la lecture</button>
       </section>
 
       <section className="grid cols">
@@ -129,7 +198,7 @@ export default function AideVocalePage() {
           <div className={item.role === "assistant" ? "card green" : "card blue"} key={index}>
             <b>{item.role === "assistant" ? "Aide IA" : "Élève"}</b>
             <p>{item.text}</p>
-            {item.role === "assistant" && <button onClick={() => speak(item.text)}>Réécouter</button>}
+            {item.role === "assistant" && <button onClick={() => readAloud(item.text)}>Réécouter</button>}
           </div>
         ))}
       </section>
