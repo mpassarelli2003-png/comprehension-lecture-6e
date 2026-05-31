@@ -8,7 +8,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="fr">
-      <body>{children}</body>
+      <body>
+        <nav className="topnav">
+          <a className="voiceHelpButton" href="/aide-vocale">Aide vocale IA</a>
+          <a className="homeButton" href="/">Accueil</a>
+        </nav>
+        {children}
+      </body>
     </html>
   );
 }
