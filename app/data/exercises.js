@@ -15,7 +15,7 @@ Les aurores boréales se parent d'une palette de couleurs enchanteresse, allant 
 
 Ces phénomènes majestueux se matérialisent souvent sous la forme de rideaux de lumière ondulants dans le ciel, offrant un spectacle naturel éblouissant qui a captivé l'attention de nombreux observateurs. La danse envoûtante des aurores boréales est un spectacle à couper le souffle, devenu une destination de choix pour les touristes avides de merveilles naturelles. Des tours d'observation ont été érigés dans plusieurs régions polaires pour permettre aux visiteurs de s'émerveiller devant ce phénomène magique tout en approfondissant leur connaissance de la science sous-jacente.
 
-Au fil des siècles et des cultures, les aurores boréales ont donné naissance à de nombreuses légendes et histoires traditionnelles. Dans la culture inuite, elles sont considérées comme les esprits des ancêtres dansant dans le ciel. Les peuples autochtones de Scandinavie racontent que les aurores boréales sont provoquées par des renards polaires traversant le ciel, faisant jaillir des étincelles de leurs queues. Les Samis, un peuple autochtone de la région nordique de Scandinavie, partagent une légende fascinante selon laquelle les aurores boréales reflètent les âmes des défunts. Ces récits témoignent de l'émerveillement qu'ont suscité les aurores boréales depuis des siècles et des efforts des différentes cultures pour comprendre et expliquer ce phénomène naturel époustouflant.
+Au fil des siècles et des cultures, les aurores boréales ont donné naissance à de nombreuses légendes et histoires traditionnelles. Dans la culture inuite, elles sont considérérées comme les esprits des ancêtres dansant dans le ciel. Les peuples autochtones de Scandinavie racontent que les aurores boréales sont provoquées par des renards polaires traversant le ciel, faisant jaillir des étincelles de leurs queues. Les Samis, un peuple autochtone de la région nordique de Scandinavie, partagent une légende fascinante selon laquelle les aurores boréales reflètent les âmes des défunts. Ces récits témoignent de l'émerveillement qu'ont suscité les aurores boréales depuis des siècles et des efforts des différentes cultures pour comprendre et expliquer ce phénomène naturel époustouflant.
 
 De nos jours, les aurores boréales continuent d'inspirer et de fasciner des individus du monde entier, qu'ils soient scientifiques, touristes ou simplement des amoureux de la beauté de la nature. Elles témoignent de la complexité et de la splendeur de notre monde naturel, suscitant émerveillement et curiosité chez ceux qui aspirent à en savoir davantage sur l'univers qui nous entoure. Malgré nos connaissances solides sur la science derrière les aurores boréales, ce phénomène fascinant et mystérieux recèle encore bien des secrets à découvrir. Ces aurores nous rappellent que notre planète regorge de merveilles, de beauté et de mystères qui méritent d'être explorés et appréciés. Chaque aurore boréale est unique, nous invitant à contempler l'infinie beauté de l'espace et à ressentir notre connexion profonde avec le cosmos.
 
@@ -39,11 +39,7 @@ En conclusion, les aurores boréales sont un spectacle céleste extraordinaire q
     ]
   },
   {
-    id: 'm-vadeboncoeur',
-    title: 'M. Vadeboncoeur',
-    level: '6e année',
-    textType: 'narratif',
-    category: 'texte littéraire',
+    id: 'm-vadeboncoeur', title: 'M. Vadeboncoeur', level: '6e année', textType: 'narratif', category: 'texte littéraire',
     intention: 'Lire pour comprendre comment les gestes de bonté d’un personnage transforment une communauté.',
     description: 'Récit complet d’un facteur qui réconforte les habitants de son quartier et laisse un héritage de générosité.',
     text: `Dans le paisible quartier Des Saules, les pas rythmés de M. Vadeboncoeur résonnent sur le pavé. Facteur dévoué depuis plus de trente ans, il connaît chaque habitant, chaque histoire cachée derrière les boîtes aux lettres qu'il remplit avec soin. À l'approche de sa retraite, une semaine lui reste pour accomplir sa mission inavouée : offrir un peu de douceur à chaque cœur qui pleure.
@@ -93,7 +89,132 @@ Et ainsi se poursuit la vie dans le quartier Des Saules, sous le doux sourire du
       q('q11','Comment l’histoire aurait-elle été différente si M. Vadeboncoeur n’avait pas pris l’initiative d’écrire ces lettres ?','interpreter',1,'Les habitants seraient probablement restés plus isolés et le quartier n’aurait pas développé la même solidarité.',false,'inference')
     ]
   },
-  PLACEHOLDER_REMAINING
+  {
+    id: 'mille-et-un-flocons',
+    title: 'Mille et un flocons',
+    level: '6e année',
+    textType: 'narratif',
+    category: 'texte littéraire',
+    intention: 'Lire pour comprendre l’expérience imaginaire d’Alice et le sens de sa tradition hivernale.',
+    description: 'Récit complet dans lequel Alice goûte les premiers flocons de neige comme s’ils avaient différentes saveurs.',
+    text: `Encore une fois cette année, la petite Alice attend avec impatience l’arrivée de la première tombée de neige. Avec chance, l’alerte météo lui confirme qu’elle pourra l’accueillir dès ce soir. D’après la petite experte en dégustation, ce ne sont que les premiers flocons de la saison qui offrent une savoureuse explosion. Dès ce pas, elle s’empresse d’enfiler son habit de neige et ses bottes doublées de mouton.
+
+La voilà debout devant la fenêtre fixant le ciel couvert de nuages glaciaux tout en agrippant la bordure de bois. Le temps passe et son regard ne cesse de balayer l’au-delà de gauche à droite. Au loin, elle remarque que la valse des sapins est déjà entamée. C’est le moment où dame Nature annonce l’arrivée des flocons de neige. Alice trop excitée, laisse la porte ouverte derrière elle. La lampe de poche à la main, elle éclaire le périmètre au-dessus de sa tuque de laine.
+
+Les yeux levés vers le ciel, elle chuchote avec empressement : « À table mes papilles ! » Les voyant toujours en plein vol, elle se met en position. Sa petite bouche s’ouvre grand et laisse sortir l’air qu’elle retenait en haleine depuis trop longtemps. C’est enfin le temps de découvrir les saveurs de cet hiver. C’est à cet instant que le premier flocon atterrit délicatement sur sa lèvre. Du coup, il la fait grimacer. Son acidité lui rappelle celle d’un citron bien mûr. En secouant la tête de dédain s’en suit un deuxième qui l’a fait plutôt sourire. Celui-ci se rapproche du goût vanillé d’une viennoiserie française. Grâce aux trois prochains, Alice savoure dans l’ordre, le chocolat, la confiture aux fraises et la crème glacée napolitaine.
+
+Les minutes passaient, mais pour Alice, cela semblait durer une éternité. Sa gourmandise insatiable l'incitait à vouloir encore et toujours plus de saveurs. Cependant, un flocon plus gros que les autres l'a soudainement surprise. Il s'est posé sur sa langue et lui a rappelé le goût d'un macaron au caramel. Puis, un autre avec une saveur de marron chaud, semblable à ceux qu'elle dégustait lors des marchés de Noël. Ses pieds enfoncés dans la neige, elle dansait d'une saveur à l'autre, se sentant transportée dans un monde magique où chaque flocon était une surprise.
+
+Les flocons, semblables à des bonbons venus du salon, tombaient du ciel en procession, à la façon des plumes d'un paon en pleine parade. Mais l'hiver, avec son doux manteau blanc, n'était pas seulement synonyme de gourmandise pour Alice. Elle réalisait que ces flocons, tout comme les bons moments de la vie, étaient éphémères et devaient être savourés avec délectation.
+
+La nuit avançait, et la lueur des lampadaires commençait à illuminer la rue. Les flocons ralentissaient leur danse, et le paysage blanc scintillait comme une constellation d'étoiles. Alice, rassasiée et comblée par son aventure gustative, retourna chez elle, fermant doucement la porte derrière elle. Elle se blottit dans son lit, repensant à tous les flocons qu'elle avait dégustés, et s'endormit paisiblement, rêvant d'un monde où chaque flocon était une promesse de douceur.
+
+Chaque hiver, Alice revivra cette tradition, attendra avec impatience le retour des premiers flocons et les accueillera avec la même joie et le même émerveillement.`,
+    questions: [
+      q('q1','Durant quelle période de l’année se déroule cette histoire ?','comprendre',1,'L’histoire se déroule durant l’hiver, au moment de la première tombée de neige de la saison.',false,'explicite'),
+      q('q2','Quel est le talent d’Alice qui est souligné dans cette histoire ?','comprendre',1,'Alice est présentée comme une experte en dégustation des flocons de neige.',false,'explicite'),
+      q('q3','Pourquoi grimace-t-elle pendant la dégustation ? Explique ton idée.','comprendre',2,'Elle grimace parce que le premier flocon a une acidité qui lui rappelle celle d’un citron bien mûr.',false,'explicite'),
+      q('q4','Quelles sont les saveurs qu’Alice découvre ? Donne deux exemples.','comprendre',1,'Exemples : citron, vanille, chocolat, confiture aux fraises, crème glacée napolitaine, macaron au caramel, marron chaud.',false,'explicite'),
+      q('q5','Où se trouve-t-elle avant la tombée de neige ?','comprendre',1,'Elle se trouve dans la maison devant la fenêtre.',false,'explicite'),
+      q('q6','Selon toi, quelle est la saveur de flocon qui serait la plus populaire auprès des dégustateurs ? Explique ton idée.','reagir',2,'Réponse personnelle justifiée par une préférence ou un élément du texte.',true,'reaction'),
+      q('q7','« À table mes papilles ! » Peux-tu identifier qui dit cette phrase ?','comprendre',1,'C’est Alice qui dit cette phrase.',false,'explicite'),
+      q('q8','D’après le texte, peux-tu décrire le mot acidité en donnant un aliment en exemple ?','comprendre',2,'L’acidité décrit un goût acide, comme celui d’un citron, d’une lime, du vinaigre ou d’une limonade surette.',false,'explicite'),
+      q('q9','Peux-tu trouver le synonyme qui pourrait remplacer le mot gout ?','comprendre',1,'Saveur.',false,'explicite'),
+      q('q10','Peux-tu trouver le synonyme qui pourrait remplacer le mot commencer ?','comprendre',1,'Entamer.',false,'explicite'),
+      q('q11','Selon le texte, comment penses-tu qu’Alice se sent à l’idée de revivre cette tradition chaque hiver ? Justifie ta réponse.','interpreter',2,'Alice semble enthousiaste et émerveillée, car elle attend les premiers flocons avec impatience et les accueille avec joie.',false,'inference'),
+      q('q12','Comment te sentirais-tu si tu avais la capacité d’Alice de goûter différents flocons de neige ? Explique ton idée.','reagir',2,'Réponse personnelle justifiée.',true,'reaction')
+    ]
+  },
+  {
+    id: 'pattes-dans-leau',
+    title: 'Pattes dans l’eau',
+    level: '6e année',
+    textType: 'narratif',
+    category: 'texte littéraire',
+    intention: 'Lire pour comprendre comment l’entraide peut transformer une difficulté en apprentissage.',
+    description: 'Récit complet où un ours polaire apprend l’humilité, la natation et la valeur de la communauté.',
+    text: `Au pays des glaçons, un soleil impitoyable avait transformé le monde blanc en une mosaïque d'étendues liquides. Le village des manchots, autrefois une toile de neige immaculée, ressemblait maintenant à un parc aquatique improvisé, avec des glissades serpentant autour de la piscine à vagues et une pataugeoire vibrante d'activité.
+
+C'est dans cette atmosphère estivale qu'il ne manquait que la présence du roi du royaume polaire pour compléter le tableau. Comme appelé par le destin, l'ours polaire fit son entrée, paré d'un maillot bleuté et armé de sa serviette de plage. Ses lunettes fumées conféraient à son allure de vacancier une touche de charme nonchalant.
+
+Il déposa ses affaires près des renards arctiques et s'avança vers la piscine. Au début confiant, ses pas se firent plus hésitants au contact des vagues. Une vague plus audacieuse le souleva, le privant de l'appui ferme du sol.
+
+Paniqué, il s'exclama : « Je n’arrive pas à toucher le sol ! »
+
+L'un des renards arctiques, plus moqueur que soucieux, imita l'ours en déplacement : « Tu n’as qu’à faire bouger tes pattes comme moi ! » Mais l'ours, malgré un effort désespéré, ne parvint pas à maîtriser la technique. Un morse, agacé par la raillerie du renard, intervint avec autorité. Avec un plongeon résolu, il alla soutenir l'ours désemparé, le poussant vers la surface. Cependant, même ce puissant nageur peinait sous l'effort.
+
+Les pingouins, témoins de la détresse, se précipitèrent pour aider. Ensemble, ils formèrent un cercle autour de l'ours polaire, le guidant vers la sécurité de la rive. Après de rudes efforts, ils parvinrent tous à sortir de l'eau, essoufflés mais sains et saufs.
+
+L'ours, le regard humble et reconnaissant, avoua qu'il ne savait pas nager et avait simplement voulu impressionner les autres.
+
+Son ami morse, avec un sourire rassurant, lui dit que l'apprentissage n'a pas d'âge. L'ours accepta la sagesse de ces mots et, déterminé, rejoignit les blanchons dans la zone peu profonde. Sous le regard bienveillant de ses amis, il prit ses premières leçons, apprenant patiemment à nager, un petit pas après l'autre.
+
+Dans le sillage tumultueux du sauvetage, la communauté des manchots s'agita d'une énergie nouvelle. Les pingouins, héros d'un jour, étaient félicités par leurs pairs, leurs petits corps vêtus de noir et blanc se balançant fièrement au rythme des acclamations. L'ours, observant l'effervescence, se sentit empli d'une gratitude immense pour ce monde gelé et pourtant si chaleureux, un monde où même la peur et l'humiliation pouvaient être transformées en occasions de liens renforcés et de solidarité.
+
+Alors que le soleil commençait à décliner, jetant des éclats d'or sur les vagues apaisées, une idée germa parmi les habitants. Pourquoi ne pas enseigner à tous ceux qui, comme l'ours, n'avaient jamais appris à nager ? Les manchots, experts en la matière, se portèrent volontaires pour donner des leçons. Le bassin d'apprentissage fut déclaré école de natation, un espace où la peur de l'eau serait vaincue.
+
+L'ours, toujours un peu embarrassé mais ému par cette vague de soutien, se plaça au centre de toutes les attentions. Sous le regard patient des manchots et les conseils doux du morse, il commença les exercices basiques : flotter, battre des pattes, et même, à sa grande fierté, plonger la tête sous l'eau sans paniquer. Chaque progrès était célébré comme une victoire, chaque éclaboussure une médaille d'audace.
+
+Les enfants du village, les blanchons, s'amusaient de voir le grand ours s'adonner à des pratiques qu'ils maîtrisaient depuis leur plus tendre enfance. Ils s'approchaient, curieux et enthousiastes, pour montrer leurs propres prouesses et encourager l'élève le plus imposant de l'école.
+
+Avec le temps, l'ours devint moins un sujet de moquerie et plus un symbole de persévérance, son histoire un rappel que la communauté est un phare dans la tempête des épreuves de la vie.
+
+La journée s'acheva sur des notes de rires et des échanges partagés. La communauté s'était rassemblée, non seulement pour célébrer le sauvetage de l'un des leurs mais pour tisser des liens plus profonds à travers l'enseignement et le partage. L'ours polaire, autrefois roi solitaire de son étendue glacée, avait découvert la valeur inestimable de l'entre-aide et de l'apprentissage communautaire.
+
+Ainsi, dans le royaume où les glaçons fondaient, les cœurs, eux, ne faisaient que se rapprocher, créant un tissu social plus résilient face aux changements imprévus. Et dans les yeux pétillants de l'ours, on pouvait lire le reflet d'une leçon inattendue : dans l'adversité, on trouve souvent les plus belles opportunités de grandir et de s'unir.`,
+    questions: [
+      q('q1','Que révèle le comportement de l’ours polaire lorsqu’il rejoint les blanchons dans la zone pour les bambins après son expérience ?','interpreter',1,'Il cherche à surmonter sa peur et son humiliation pour apprendre à nager.',false,'inference'),
+      q('q2','Pourquoi l’ours polaire s’est-il retrouvé en difficulté dans la piscine à vagues ?','comprendre',1,'L’ours ne savait pas nager et une vague l’a empêché de toucher le sol.',false,'explicite'),
+      q('q3','Nomme les animaux qui lui sont venus en aide.','comprendre',1,'Le morse et les pingouins lui sont venus en aide.',false,'explicite'),
+      q('q4','Dans le texte, le terme blanchons fait référence à quoi ?','comprendre',1,'Aux petits manchots.',false,'explicite'),
+      q('q5','Comment la communauté a-t-elle réagi face à la détresse de l’ours polaire ?','comprendre',1,'La communauté a collaboré pour sauver l’ours.',false,'important'),
+      q('q6','Quelle leçon l’ours polaire a-t-il apprise à la fin de l’histoire et comment cela a-t-il affecté la communauté ?','comprendre',2,'L’ours a appris l’importance de l’apprentissage et de la solidarité, ce qui a renforcé l’unité de la communauté.',false,'important'),
+      q('q7','Comment vous sentiriez-vous si vous étiez l’ours polaire dans cette situation ?','reagir',2,'Réponse personnelle justifiée.',true,'reaction'),
+      q('q8','Pourquoi peut-on considérer que l’incident à la piscine à vagues a eu un impact positif sur l’ours polaire et sur la communauté ?','interpreter',2,'L’incident a permis à l’ours d’apprendre l’humilité et la nage, et à la communauté de renforcer l’entraide.',false,'inference'),
+      q('q9','Quelle émotion principale avez-vous ressentie en lisant l’histoire de l’ours polaire et pourquoi ?','reagir',2,'Réponse personnelle justifiée.',true,'reaction')
+    ]
+  },
+  {
+    id: 'pirouette-dans-les-airs',
+    title: 'Pirouette dans les airs',
+    level: '6e année',
+    textType: 'narratif',
+    category: 'texte littéraire',
+    intention: 'Lire pour comprendre les essais, erreurs et solutions d’un personnage créatif.',
+    description: 'Récit complet d’un écureuil inventif qui veut voler pour trouver une feuille précieuse.',
+    text: `Durant sa sieste d’après-midi, il rêvasse à la plus belle feuille d’érable jamais vue. C’est cette feuille à la couleur qui rappelle celle de la pierre précieuse et ornée de pointes dorées dont tout le monde parle. Il s’imagine mettre la patte sur ce chef-d’œuvre de dame nature. C’est en pointant sa patte gauche qu’il se fait basculer en dehors de son lit douillet.
+
+Le petit malin plante ses griffes à l’écorce et reste heureusement accroché à l’arbre.
+
+Pirouette l’a échappé belle. La tête encore décoiffée de son éveil brusque, il se met au travail. « Je trouverai ce trésor d’automne cette année ! » dit-il d’un ton convaincu.
+
+Une chose est certaine, c’est qu’il n’arrivera pas à temps s’il doit grimper les sommets de toute la forêt. Le petit écureuil vient à la conclusion qu’il devra voler au-dessus de tous les feuillus afin de trouver sa précieuse. « Eureka ! » s’écrie-t-il. Il décide de fabriquer un casque équipé d'hélices en utilisant un fruit de chêne. Le petit rongeur grimpeur empoigne l’une des noix de sa réserve et l’essaie. Elle lui va comme un gant. Et pour les hélices, il choisit la plus belle paire de fruits d’érable qu’on surnomme déjà les hélicoptères. « Oups ! » Un détail important lui a échappé. Tout en se grattant la tête, il se demande comment il pourra fixer les hélices à son casque.
+
+Pirouette s’arrête devant la porte du terrier de Charlo la marmotte et lui demande conseil. L’autre rongeur lui suggère d’utiliser de l’argile et un peu d’eau. Persuadé qu’il a la solution, il le rassure en lui disant que c’est de cette façon qu’il solidifie les murs de sa demeure. Il retourne au pied de son arbre et applique une bonne couche de boue. « Aïe ! » s’exclame-t-il. La lourdeur du mélange brise ses hélices.
+
+Le voyant triste que son idée n’ait pas fonctionné, l’hirondelle perchée sur la troisième branche lui propose d’utiliser une pâte de feuilles mâchées comme celle que les hirondelles appliquent pour construire leur nid. L’oiseau lui offre même de l’aider à la fabriquer. À l’unisson, ils se mettent à mastiquer les feuilles mortes ramassées au sol et appliquent la pâte sous les nouvelles hélices. Aussitôt imbibées, les hélices deviennent toutes trempées et ne sont bonnes que pour le compost.
+
+Pirouette est embêté. Afin que son rêve devienne réalité, il devra trouver une autre solution.
+
+Il s’appuie la tête contre l’arbre et se colle soudainement les oreilles à la sève d’un sapin. « Eureka ! » s’écrit-il. Il en applique une petite quantité sous sa dernière paire d’hélices et le tour est joué. L’aventurier a enfin son engin volant. De ce pas, il grimpe au sommet de cet arbre. Il prend son élan et met en marche son hélicoptère d’écureuil.
+
+« Ça y est, je vole maintenant ! » crie-t-il en survolant tous ces sommets.
+
+Tout en pilotant son engin, une lumière flamboyante l’éblouit. « C’est elle ! » murmure-t-il d’étonnement. Il valse un peu vers la gauche et ensuite un peu vers la droite pour enfin mettre les pattes sur celle qu’il avait tant attendue. C’est dans ses yeux vitreux qu’une feuille à la couleur rubis brille d’éclat.`,
+    questions: [
+      q('q1','Quel est le rêve de Pirouette ?','comprendre',1,'Pirouette rêve de mettre la patte sur la feuille rubis.',false,'explicite'),
+      q('q2','Où est l’atelier du bricoleur ?','comprendre',1,'Son atelier est au pied de l’arbre où il vit.',false,'explicite'),
+      q('q3','Peux-tu décrire un trait de personnalité de Pirouette en t’appuyant sur le texte ?','comprendre',1,'Il peut être décrit comme agile, brillant, créatif ou persévérant, avec une preuve du texte.',false,'inference'),
+      q('q4','Pourquoi va-t-il chez Charlo, la marmotte ?','comprendre',1,'Il va chez Charlo pour lui demander conseil.',false,'explicite'),
+      q('q5','Comment se sent Pirouette après sa première tentative ?','comprendre',1,'Il se sent triste que son idée n’ait pas fonctionné.',false,'explicite'),
+      q('q6','Que veut dire l’expression aller comme un gant ?','comprendre',1,'Cela signifie qu’un vêtement ou un accessoire convient parfaitement.',false,'explicite'),
+      q('q7','« C’est elle ! » Peux-tu identifier qui dit cette phrase ?','comprendre',1,'C’est Pirouette qui dit cette phrase.',false,'explicite'),
+      q('q8','Dans la phrase « À l’unisson, ils se mettent à mastiquer... », qui est remplacé par ils ?','comprendre',1,'Ils remplace Pirouette et l’hirondelle.',false,'explicite'),
+      q('q9','Que représente le groupe du nom sa précieuse ?','comprendre',2,'Sa précieuse représente la feuille rubis.',false,'explicite'),
+      q('q10','Replace les événements dans le bon ordre : il s’imagine mettre la patte sur cette feuille; l’hirondelle lui propose de l’aider; Pirouette essaie son casque; Pirouette survole les sommets.','comprendre',2,'Bon ordre : 1. Il s’imagine mettre la patte sur cette feuille. 2. Pirouette essaie son casque. 3. L’hirondelle lui propose de l’aider. 4. Pirouette survole les sommets.',false,'important'),
+      q('q11','Si Pirouette ne s’était pas collé les oreilles dans la sève, comment aurait-il trouvé cette solution ? Explique ton idée.','interpreter',2,'Réponse personnelle plausible; il aurait pu continuer à chercher, demander conseil ou expérimenter d’autres matériaux.',true,'inference')
+    ]
+  }
 ];
 
 const grid = [
