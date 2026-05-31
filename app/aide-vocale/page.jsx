@@ -1,70 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import exercises from "../data/exercises";
-
-function getFrenchVoice() {
-  if (typeof window === "undefined" || !window.speechSynthesis) return null;
-  const voices = window.speechSynthesis.getVoices() || [];
-  return voices.find((voice) => voice.lang === "fr-CA")
-    || voices.find((voice) => voice.lang?.toLowerCase().startsWith("fr"))
-    || voices[0]
-    || null;
-}
-
-function splitTextForSpeech(text) {
-  const clean = String(text || "").replace(/\s+/g, " ").trim();
-  if (!clean) return [];
-  const chunks = [];
-  let rest = clean;
-  while (rest.length > 0) {
-    let slice = rest.slice(0, 180);
-    const lastStop = Math.max(slice.lastIndexOf("."), slice.lastIndexOf("!"), slice.lastIndexOf("?"), slice.lastIndexOf(";"), slice.lastIndexOf(","));
-    if (rest.length > 180 && lastStop > 60) slice = slice.slice(0, lastStop + 1);
-    chunks.push(slice.trim());
-    rest = rest.slice(slice.length).trim();
-  }
-  return chunks;
-}
-
-function speak(text, onStatus) {
-  if (typeof window === "undefined" || !window.speechSynthesis || typeof SpeechSynthesisUtterance === "undefined") {
-    onStatus?.("La lecture vocale n’est pas disponible dans ce navigateur.");
-    return;
-  }
-
-  const chunks = splitTextForSpeech(text);
-  if (chunks.length === 0) {
-    onStatus?.("Il n’y a rien à lire.");
-    return;
-  }
-
-  window.speechSynthesis.cancel();
-  const voice = getFrenchVoice();
-  let index = 0;
-
-  const readNext = () => {
-    if (index >= chunks.length) {
-      onStatus?.("Lecture terminée.");
-      return;
-    }
-    const utterance = new SpeechSynthesisUtterance(chunks[index]);
-    utterance.lang = voice?.lang || "fr-CA";
-    utterance.voice = voice;
-    utterance.rate = 0.85;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    utterance.onstart = () => onStatus?.("Lecture en cours...");
-    utterance.onerror = () => onStatus?.("La lecture vocale a été bloquée ou n’est pas disponible. Essaie Chrome et vérifie le son de l’appareil.");
-    utterance.onend = () => {
-      index += 1;
-      setTimeout(readNext, 120);
-    };
-    window.speechSynthesis.speak(utterance);
-  };
-
-  setTimeout(readNext, 50);
-}
 
 export default function AideVocalePage() {
   const [exerciseId, setExerciseId] = useState(exercises[0]?.id || "");
@@ -75,24 +12,65 @@ export default function AideVocalePage() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
-  const [speechStatus, setSpeechStatus] = useState("Lecture vocale prête.");
-
-  function readAloud(text) {
-    speak(text, setSpeechStatus);
-  }
-
-  function stopSpeaking() {
-    if (typeof window !== "undefined" && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-      setSpeechStatus("Lecture arrêtée.");
-    }
-  }
+  const [speechStatus, setSpeechStatus] = useState("Audio prêt.");
+  const [audioUrl, setAudioUrl] = useState("");
+  const audioRef = useRef(null);
 
   function changeExercise(id) {
     const next = exercises.find((item) => item.id === id) || exercises[0];
     setExerciseId(next.id);
     setQuestionId(next.questions?.[0]?.id || "q1");
     setHistory([]);
+  }
+
+  async function readAloud(text) {
+    const cleanText = String(text || "").trim();
+    if (!cleanText) {
+      setSpeechStatus("Il n’y a rien à lire.");
+      return;
+    }
+
+    setSpeechStatus("Création de l’audio...");
+    try {
+      const response = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: cleanText })
+      });
+
+      if (!response.ok) {
+        const detail = await response.text();
+        setSpeechStatus("Audio non disponible. Vérifie OPENAI_API_KEY et les crédits API.");
+        console.error("Erreur TTS", detail);
+        return;
+      }
+
+      const blob = await response.blob();
+      const nextUrl = URL.createObjectURL(blob);
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      setAudioUrl(nextUrl);
+      setSpeechStatus("Audio prêt. Lecture en cours...");
+
+      setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.src = nextUrl;
+          audioRef.current.play().catch(() => {
+            setSpeechStatus("Le navigateur bloque la lecture automatique. Appuie sur le bouton lecture du lecteur audio.");
+          });
+        }
+      }, 50);
+    } catch (error) {
+      setSpeechStatus("Erreur audio. Vérifie la connexion et les journaux Vercel.");
+      console.error(error);
+    }
+  }
+
+  function stopSpeaking() {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setSpeechStatus("Lecture arrêtée.");
   }
 
   async function askAI(customMessage) {
@@ -153,9 +131,10 @@ export default function AideVocalePage() {
         <a href="/">Retour à l’application</a>
         <h1>Aide vocale conversationnelle</h1>
         <p>Cette aide utilise le texte choisi, la question, les indices et les corrigés enseignants. Elle guide l’élève sans donner directement la réponse.</p>
-        <p className="yellow"><b>État vocal :</b> {speechStatus}</p>
-        <button onClick={() => readAloud("Bonjour. La lecture vocale fonctionne. Je peux lire les réponses à voix haute.")}>Tester le son</button>
+        <p className="yellow"><b>État audio :</b> {speechStatus}</p>
+        <button onClick={() => readAloud("Bonjour. L’audio OpenAI fonctionne. Je peux lire les réponses à voix haute.")}>Tester l’audio OpenAI</button>
         <button onClick={stopSpeaking}>Arrêter la lecture</button>
+        <audio ref={audioRef} controls style={{ width: "100%", marginTop: 12 }} onEnded={() => setSpeechStatus("Lecture terminée.")}>Votre navigateur ne supporte pas le lecteur audio.</audio>
       </section>
 
       <section className="grid cols">
@@ -198,7 +177,7 @@ export default function AideVocalePage() {
           <div className={item.role === "assistant" ? "card green" : "card blue"} key={index}>
             <b>{item.role === "assistant" ? "Aide IA" : "Élève"}</b>
             <p>{item.text}</p>
-            {item.role === "assistant" && <button onClick={() => readAloud(item.text)}>Réécouter</button>}
+            {item.role === "assistant" && <button onClick={() => readAloud(item.text)}>Réécouter avec audio OpenAI</button>}
           </div>
         ))}
       </section>
