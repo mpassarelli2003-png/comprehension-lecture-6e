@@ -34,6 +34,37 @@ const wordHelp = {
   quoi: "Je cherche une action, une idée ou un objet."
 };
 
+const proofTools = {
+  explicite: {
+    label: "Information explicite",
+    className: "blue",
+    title: "C'est écrit clairement dans le texte.",
+    text: "Utilise cet outil quand la réponse est directement écrite. Tu peux presque pointer la phrase avec ton doigt. Exemple : le nom d'un personnage, un lieu, une action ou un objet mentionné clairement.",
+    question: "Je me demande : Est-ce que je peux copier une partie du texte pour répondre ?"
+  },
+  inference: {
+    label: "Indice pour inférence",
+    className: "yellow",
+    title: "Je dois lire entre les lignes.",
+    text: "Utilise cet outil quand la réponse n'est pas écrite mot pour mot. Tu dois prendre des indices dans le texte et les relier avec ce que tu sais déjà. C'est comme faire une petite déduction de détective.",
+    question: "Je me demande : Qu'est-ce que le texte me fait comprendre sans le dire directement ?"
+  },
+  reaction: {
+    label: "Exemple pour réagir",
+    className: "pink",
+    title: "Je donne mon avis avec une preuve.",
+    text: "Utilise cet outil quand la question te demande ce que tu penses, ce que tu ressens ou comment tu aurais réagi. Tu peux parler de toi, mais tu dois choisir un exemple du texte pour appuyer ton idée.",
+    question: "Je me demande : Quel passage du texte explique ma réaction ?"
+  },
+  important: {
+    label: "Idée importante",
+    className: "green",
+    title: "C'est une idée essentielle du texte.",
+    text: "Utilise cet outil pour surligner une information qui aide à comprendre le message, le problème, la solution, le changement d'un personnage ou l'idée principale. Ce n'est pas un détail inutile.",
+    question: "Je me demande : Si j'enlève cette information, est-ce que je comprends moins bien le texte ?"
+  }
+};
+
 function detectQuestionWord(prompt) {
   const lower = prompt.toLowerCase();
   if (lower.includes("pourquoi")) return "pourquoi";
@@ -65,11 +96,13 @@ export default function Home() {
   const [proofs, setProofs] = useState([]);
   const [answers, setAnswers] = useState({});
   const [checks, setChecks] = useState({});
+  const [activeProofTool, setActiveProofTool] = useState("explicite");
 
   const paragraphs = useMemo(() => exercise.text.split("\n").filter(Boolean), [exercise.text]);
   const question = exercise.questions[qIndex];
   const currentWord = detectQuestionWord(question?.prompt || "");
   const currentProofs = proofs.filter((p) => p.questionId === question?.id);
+  const activeTool = proofTools[activeProofTool];
 
   function importExercise() {
     try {
@@ -158,7 +191,7 @@ export default function Home() {
             <button disabled={qIndex === 0} onClick={() => setQIndex(Math.max(0, qIndex - 1))}>Question précédente</button>
             <button disabled={qIndex === exercise.questions.length - 1} onClick={() => setQIndex(Math.min(exercise.questions.length - 1, qIndex + 1))}>Question suivante</button>
             {step === 3 && <div><h2>Étape 3 — Je comprends la question</h2><p className="yellow">Mot-question : {currentWord}</p><p>{wordHelp[currentWord]}</p><p><b>Ma réponse à cette question</b></p><textarea value={answers[question.id] || ""} onChange={(e) => setAnswers({...answers, [question.id]: e.target.value})} placeholder="Écris ici ta première réponse. Tu pourras l'améliorer aux étapes 4 et 5 avec des preuves du texte." /><p className="yellow">Conseil : réponds avec les mots de la question, puis retourne au texte pour trouver une preuve.</p></div>}
-            {step === 4 && <div><h2>Étape 4 — Je trouve mes preuves</h2><p>Sélection actuelle : <b>{selected || "Aucun texte sélectionné"}</b></p><button onClick={() => addProof("explicite")}>Information explicite</button><button onClick={() => addProof("inference")}>Indice pour inférence</button><button onClick={() => addProof("reaction")}>Exemple pour réagir</button><button onClick={() => addProof("important")}>Idée importante</button>{currentProofs.map((p) => <p className="yellow" key={p.id}>{p.kind} : {p.text}</p>)}</div>}
+            {step === 4 && <div><h2>Étape 4 — Je trouve mes preuves</h2><p>Surligneur : sélectionne un bout du texte à gauche, choisis l'outil qui convient, puis appuie sur Surligner.</p><p>Sélection actuelle : <b>{selected || "Aucun texte sélectionné"}</b></p><div>{Object.entries(proofTools).map(([key, tool]) => <button key={key} className={activeProofTool === key ? tool.className : ""} onClick={() => setActiveProofTool(key)}>{tool.label}</button>)}</div><div className={`card ${activeTool.className}`}><h3>{activeTool.title}</h3><p>{activeTool.text}</p><p><b>Question à me poser :</b> {activeTool.question}</p></div><button className={activeTool.className} onClick={() => addProof(activeProofTool)}>Surligner avec cet outil</button>{currentProofs.map((p) => <p className={proofTools[p.kind]?.className || "yellow"} key={p.id}><b>{proofTools[p.kind]?.label || p.kind} :</b> {p.text}</p>)}</div>}
             {step === 5 && <div><h2>Étape 5 — J'écris ma réponse</h2><button className="green" onClick={() => setAnswers({...answers, [question.id]: starter(question.type)})}>Insérer un début de phrase</button><textarea value={answers[question.id] || ""} onChange={(e) => setAnswers({...answers, [question.id]: e.target.value})} placeholder="Écris ta réponse complète ici..." /><details><summary>Voir les indices</summary><ol>{question.hints.map((h) => <li key={h}>{h}</li>)}</ol></details></div>}
             {step === 6 && <div><h2>Étape 6 — Je vérifie</h2>{["J'ai répondu à la question.","J'ai utilisé une preuve du texte.","Ma réponse est complète.","Mon explication est claire.","J'ai relu ma réponse."].map((c) => <label key={c} style={{display:"block", margin:"8px"}}><input type="checkbox" checked={!!checks[c]} onChange={(e) => setChecks({...checks, [c]: e.target.checked})} /> {c}</label>)}<p><b>Réponse actuelle :</b></p><p>{answers[question.id] || "Aucune réponse."}</p><details><summary>Corrigé enseignant</summary><p>{question.expectedAnswer}</p></details></div>}
           </div>}
