@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import exercises from "../data/exercises";
+import baseExercises from "../data/exercises";
+import moreExercises from "../data/moreExercises";
+
+const exercises = [...baseExercises, ...moreExercises];
 
 function normalize(text) {
   return String(text || "").replace(/\s+/g, " ").trim().toLowerCase();
