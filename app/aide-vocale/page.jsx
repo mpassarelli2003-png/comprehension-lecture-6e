@@ -1,7 +1,11 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import exercises from "../data/exercises";
+
+function normalize(text) {
+  return String(text || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
 
 export default function AideVocalePage() {
   const [exerciseId, setExerciseId] = useState(exercises[0]?.id || "");
@@ -14,13 +18,51 @@ export default function AideVocalePage() {
   const [listening, setListening] = useState(false);
   const [speechStatus, setSpeechStatus] = useState("Audio prêt.");
   const [audioUrl, setAudioUrl] = useState("");
+  const [contextStatus, setContextStatus] = useState("Contexte chargé par défaut.");
   const audioRef = useRef(null);
+
+  useEffect(() => {
+    const savedTitle = localStorage.getItem("lectureCurrentExerciseTitle");
+    const savedQuestion = localStorage.getItem("lectureCurrentQuestionPrompt");
+
+    if (!savedTitle && !savedQuestion) return;
+
+    const byTitle = exercises.find((item) => normalize(item.title) === normalize(savedTitle));
+    const byQuestion = exercises.find((item) => item.questions?.some((q) => normalize(q.prompt) === normalize(savedQuestion)));
+    const nextExercise = byTitle || byQuestion;
+
+    if (nextExercise) {
+      const nextQuestion = savedQuestion
+        ? nextExercise.questions?.find((q) => normalize(q.prompt) === normalize(savedQuestion))
+        : null;
+
+      setExerciseId(nextExercise.id);
+      setQuestionId(nextQuestion?.id || nextExercise.questions?.[0]?.id || "q1");
+      setHistory([]);
+      setContextStatus(`Contexte synchronisé : ${nextExercise.title}${nextQuestion ? " — question actuelle" : ""}.`);
+    } else {
+      setContextStatus("Aucun contexte synchronisé trouvé. Choisis le texte et la question manuellement.");
+    }
+  }, []);
 
   function changeExercise(id) {
     const next = exercises.find((item) => item.id === id) || exercises[0];
     setExerciseId(next.id);
     setQuestionId(next.questions?.[0]?.id || "q1");
     setHistory([]);
+    localStorage.setItem("lectureCurrentExerciseTitle", next.title);
+    localStorage.removeItem("lectureCurrentQuestionPrompt");
+    setContextStatus(`Contexte changé : ${next.title}.`);
+  }
+
+  function changeQuestion(id) {
+    setQuestionId(id);
+    const nextQuestion = exercise?.questions?.find((item) => item.id === id);
+    if (nextQuestion) {
+      localStorage.setItem("lectureCurrentExerciseTitle", exercise.title);
+      localStorage.setItem("lectureCurrentQuestionPrompt", nextQuestion.prompt);
+      setContextStatus(`Question synchronisée : ${nextQuestion.prompt}`);
+    }
   }
 
   async function readAloud(text) {
@@ -131,6 +173,7 @@ export default function AideVocalePage() {
         <a href="/">Retour à l’application</a>
         <h1>Aide vocale conversationnelle</h1>
         <p>Cette aide utilise le texte choisi, la question, les indices et les corrigés enseignants. Elle guide l’élève sans donner directement la réponse.</p>
+        <p className="yellow"><b>Contexte :</b> {contextStatus}</p>
         <p className="yellow"><b>État audio :</b> {speechStatus}</p>
         <button onClick={() => readAloud("Bonjour. L’audio OpenAI fonctionne. Je peux lire les réponses à voix haute.")}>Tester l’audio OpenAI</button>
         <button onClick={stopSpeaking}>Arrêter la lecture</button>
@@ -145,7 +188,7 @@ export default function AideVocalePage() {
             {exercises.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
           </select>
           <label>Question</label>
-          <select value={question?.id || ""} onChange={(event) => setQuestionId(event.target.value)}>
+          <select value={question?.id || ""} onChange={(event) => changeQuestion(event.target.value)}>
             {exercise?.questions?.map((item, index) => <option key={item.id} value={item.id}>Question {index + 1} — {item.prompt}</option>)}
           </select>
           <div className="card yellow">
