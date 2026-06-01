@@ -56,15 +56,6 @@ function responseTarget(q, word) {
   return base + " Tu dois répondre exactement à ce qui est demandé.";
 }
 
-function correctionTitle(type) {
-  if (type === "comprendre") return "Réponse attendue";
-  if (type === "interpreter") return "Exemple de réponse plausible";
-  if (type === "reagir") return "Exemple de réaction justifiée";
-  if (type === "apprecier") return "Exemple d'appréciation";
-  if (type === "jugement") return "Exemple de jugement critique";
-  return "Corrigé";
-}
-
 function splitIntoSentences(text) {
   return String(text || "").match(/[^.!?;:]+[.!?;:]?|.+/g)?.filter(Boolean) || [text];
 }
@@ -325,7 +316,7 @@ export default function Home() {
   );
 
   if (view === "progress") return (
-    <main className="page"><TopControls /><section className="card"><h1>Mes progrès</h1><p>Texte actuel : <b>{exercise.title}</b></p>{exercise.questions.map((q, i) => <div className="card" key={q.id}><b>Question {i + 1} : {q.prompt}</b><p>Réponse : {answers[q.id] || "Non répondue"}</p><p>Preuves : {proofs.filter((p) => p.questionId === q.id).length}</p></div>)}</section></main>
+    <main className="page"><TopControls /><section className="card"><h1>Mes progrès</h1><p>Texte actuel : <b>{exercise.title}</b></p>{exercise.questions.map((q, i) => <div className="card" key={q.id}><b>Question {i + 1}</b><p>Réponse enregistrée : {answers[q.id] ? "Oui" : "Non répondue"}</p><p>Preuves : {proofs.filter((p) => p.questionId === q.id).length}</p></div>)}</section></main>
   );
 
   return (
@@ -348,13 +339,13 @@ export default function Home() {
           {step === 1 && <div><h2>Étape 1 — Avant de lire</h2><ul className="list"><li>Je lis le titre.</li><li>Je prédis le sujet.</li><li>J’active ce que je connais déjà.</li><li>Je lis l’intention de lecture.</li></ul></div>}
           {step === 2 && <div><h2>Étape 2 — Pendant la lecture</h2><p>Active le surligneur jaune, puis clique sur les phrases importantes. Ces surlignages resteront visibles aux autres étapes.</p><p>Écris aussi une idée courte : ces phrases deviendront les sous-titres des paragraphes aux étapes suivantes.</p></div>}
           {step >= 3 && <div>
-            <div className="card"><b>Question {qIndex + 1} / {exercise.questions.length}</b><h2>{question.prompt}</h2><p>{question.type} — {question.points} point(s)</p></div>
-            <button disabled={qIndex === 0} onClick={() => setQIndex(Math.max(0, qIndex - 1))}>Question précédente</button>
-            <button disabled={qIndex === exercise.questions.length - 1} onClick={() => setQIndex(Math.min(exercise.questions.length - 1, qIndex + 1))}>Question suivante</button>
+            {step !== 6 && <div className="card"><b>Question {qIndex + 1} / {exercise.questions.length}</b><h2>{question.prompt}</h2><p>{question.type} — {question.points} point(s)</p></div>}
+            {step !== 6 && <button disabled={qIndex === 0} onClick={() => setQIndex(Math.max(0, qIndex - 1))}>Question précédente</button>}
+            {step !== 6 && <button disabled={qIndex === exercise.questions.length - 1} onClick={() => setQIndex(Math.min(exercise.questions.length - 1, qIndex + 1))}>Question suivante</button>}
             {step === 3 && <div><h2>Étape 3 — Je comprends la question</h2><p className="yellow">Mot-question : {currentWord}</p><p>{wordHelp[currentWord]}</p><p><b>Ma première réponse</b></p><textarea value={answers[question.id] || ""} onChange={(e) => setAnswers({...answers, [question.id]: e.target.value})} placeholder="Écris ici ta première réponse. Elle est sauvegardée automatiquement." /><p className="yellow">Conseil : réponds avec les mots de la question, puis retourne au texte pour trouver une preuve.</p></div>}
             {step === 4 && <div><h2>Étape 4 — Je trouve mes preuves</h2><p>Sélectionne un bout du texte à gauche, choisis l’outil qui convient, puis appuie sur Surligner.</p><p>Sélection actuelle : <b>{selected || "Aucun texte sélectionné"}</b></p><div>{Object.entries(proofTools).map(([key, tool]) => <button key={key} className={activeProofTool === key ? tool.className : ""} onClick={() => setActiveProofTool(key)}>{tool.label}</button>)}</div><div className={`card ${activeTool.className}`}><h3>{activeTool.title}</h3><p>{activeTool.text}</p></div><button className={activeTool.className} onClick={() => addProof(activeProofTool)}>Surligner avec cet outil</button>{currentProofs.length > 0 && <button onClick={clearQuestionProofs}>Effacer tous mes surlignages</button>}<div className="card"><h3>Mes surlignages sauvegardés</h3>{currentProofs.length === 0 ? <p>Aucun surlignage pour cette question.</p> : currentProofs.map((p, index) => <div className="card" key={p.id}><p><b>{index + 1}. {proofTools[p.kind]?.label || p.kind}</b></p><p className={proofTools[p.kind]?.className || "yellow"}>{p.text}</p><label>Changer le type : <select value={p.kind} onChange={(e) => changeProofKind(p.id, e.target.value)}>{Object.entries(proofTools).map(([key, tool]) => <option key={key} value={key}>{tool.label}</option>)}</select></label><div><button onClick={() => deleteProof(p.id)}>Supprimer</button><button className="green" onClick={() => useProofInAnswer(p.text)}>Utiliser dans ma réponse</button></div></div>)}</div></div>}
             {step === 5 && <div><h2>Étape 5 — J’écris et j’améliore ma réponse</h2><div className="card yellow"><b>Ce que la question demande :</b><p>Mot-question : {currentWord}. {wordHelp[currentWord]}</p><p>{responseTarget(question, currentWord)}</p></div><div className="card"><b>Mes preuves de l’étape 4</b>{currentProofs.length === 0 ? <p>Aucune preuve choisie. Retourne à l’étape 4 si tu veux t’aider.</p> : currentProofs.map((p, index) => <p className={proofTools[p.kind]?.className || "yellow"} key={p.id}><b>{proofLabel(index)} :</b> {p.text}</p>)}</div><button className="green" onClick={() => setAnswers({...answers, [question.id]: starter(question.type)})}>Insérer un début de phrase</button><textarea value={answers[question.id] || ""} onChange={(e) => setAnswers({...answers, [question.id]: e.target.value})} placeholder="Écris ta réponse complète ici. Elle est sauvegardée automatiquement." /><div className="card"><h3>Indices gradués</h3><p>Ouvre seulement l’indice dont tu as besoin. Les indices deviennent de plus en plus aidants.</p>{graduatedHints.map((hint) => <details key={hint.title}><summary>{hint.title}</summary><p>{hint.text}</p></details>)}</div></div>}
-            {step === 6 && <div><h2>Étape 6 — Je vérifie</h2><h3>Grille d’auto-correction</h3>{getAutoCorrectionGrid().map((c) => <div className="card" key={c}><p>{c}</p>{["Oui","Un peu","Non"].map((choice) => <label key={choice} style={{marginRight:12}}><input type="radio" name={checkKey(c)} checked={checks[checkKey(c)] === choice} onChange={() => setChecks({...checks, [checkKey(c)]: choice})} /> {choice}</label>)}</div>)}<p><b>Réponse actuelle :</b></p><p>{answers[question.id] || "Aucune réponse."}</p><details><summary>{correctionTitle(question.type)}</summary><p>{question.expectedAnswer}</p>{question.isPersonalAnswer && <p>Cette réponse est un exemple. Une autre réponse peut être correcte si elle est bien expliquée avec le texte.</p>}</details></div>}
+            {step === 6 && <div><h2>Étape 6 — Je vérifie</h2><p className="yellow"><b>Mode vérification :</b> la question, ta réponse et le corrigé ne sont pas affichés ici. Utilise seulement la grille pour vérifier ta démarche.</p><h3>Grille d’auto-correction</h3>{getAutoCorrectionGrid().map((c) => <div className="card" key={c}><p>{c}</p>{["Oui","Un peu","Non"].map((choice) => <label key={choice} style={{marginRight:12}}><input type="radio" name={checkKey(c)} checked={checks[checkKey(c)] === choice} onChange={() => setChecks({...checks, [checkKey(c)]: choice})} /> {choice}</label>)}</div>)}</div>}
           </div>}
         </section>
       </div>
