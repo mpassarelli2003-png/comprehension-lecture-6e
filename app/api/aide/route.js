@@ -1,4 +1,7 @@
-import exercises from "../../data/exercises";
+import baseExercises from "../../data/exercises";
+import moreExercises from "../../data/moreExercises";
+
+const exercises = [...baseExercises, ...moreExercises];
 
 export async function POST(request) {
   try {
