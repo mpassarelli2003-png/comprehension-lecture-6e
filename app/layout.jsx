@@ -1,8 +1,8 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Lecture 6e année',
-  description: 'Application de pratique en compréhension de lecture'
+  title: 'Lecture et écriture 6e année',
+  description: 'Application de pratique en compréhension de lecture et préparation à l’écriture'
 };
 
 export default function RootLayout({ children }) {
@@ -10,8 +10,9 @@ export default function RootLayout({ children }) {
     <html lang="fr">
       <body>
         <nav className="topnav">
-          <a className="voiceHelpButton" href="/aide-vocale">Aide vocale IA</a>
           <a className="homeButton" href="/">Accueil</a>
+          <a className="writingButton" href="/ecriture">Volet écriture</a>
+          <a className="voiceHelpButton" href="/aide-vocale">Aide vocale IA</a>
         </nav>
         {children}
       </body>
