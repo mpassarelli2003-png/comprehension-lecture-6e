@@ -21,6 +21,10 @@ function buildPlanFromIdeas(ideas, preciseSituation, situation) {
   };
 }
 
+function hasPlanContent(plan) {
+  return [plan.intro, plan.dev1, plan.dev2, plan.conclusion].some((part) => String(part || "").trim());
+}
+
 export default function Step3Plan({ situation, preciseSituation, ideas, plan, setPlan, readyForPlan }) {
   const introOk = plan.intro.trim().length > 0;
   const dev1Ok = plan.dev1.trim().length > 0;
@@ -29,6 +33,10 @@ export default function Step3Plan({ situation, preciseSituation, ideas, plan, se
   const completeCount = [introOk, dev1Ok, dev2Ok, conclusionOk].filter(Boolean).length;
 
   function fillPlan() {
+    if (hasPlanContent(plan)) {
+      const confirmReplace = window.confirm("Tu as déjà écrit dans ton plan. Veux-tu vraiment remplacer ton plan par un plan généré à partir de tes idées ?");
+      if (!confirmReplace) return;
+    }
     setPlan(buildPlanFromIdeas(ideas, preciseSituation, situation));
   }
 
@@ -62,6 +70,7 @@ export default function Step3Plan({ situation, preciseSituation, ideas, plan, se
           <p key={index}><b>{idea.role || `Idée ${index + 1}`} :</b> {idea.say || "À compléter"} {idea.proof ? `— preuve : ${idea.proof}` : ""}</p>
         ))}
         <button className="green" onClick={fillPlan}>Transformer mes idées en plan</button>
+        <p className="yellow"><b>Sécurité :</b> si tu as déjà écrit dans ton plan, l’application demandera une confirmation avant de le remplacer.</p>
         {!readyForPlan && <p className="yellow"><b>Attention :</b> ton plan sera meilleur si tu complètes au moins 2 idées et 1 preuve à l’étape 2.</p>}
       </div>
 
