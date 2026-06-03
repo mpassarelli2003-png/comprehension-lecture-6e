@@ -1,4 +1,20 @@
+function hasStudentIdeaContent(ideas) {
+  return (ideas || []).some((row) =>
+    String(row?.know || "").trim() ||
+    String(row?.say || "").trim() ||
+    String(row?.proof || "").trim()
+  );
+}
+
 export default function Step2Ideas({ preciseSituation, ideas, updateIdea, prepareIdeasFromConsigne, filledIdeas, ideasWithProof, readyForPlan }) {
+  function safePrepareIdeas() {
+    if (hasStudentIdeaContent(ideas)) {
+      const confirmReplace = window.confirm("Tu as déjà écrit des idées. Veux-tu vraiment les remplacer par des idées préparées à partir de la consigne ?");
+      if (!confirmReplace) return;
+    }
+    prepareIdeasFromConsigne();
+  }
+
   return (
     <div>
       <h2>Étape 2 — Je prépare mes idées</h2>
@@ -20,7 +36,8 @@ export default function Step2Ideas({ preciseSituation, ideas, updateIdea, prepar
         <p>{preciseSituation.task}</p>
         <b>Je dois penser à :</b>
         <ul>{preciseSituation.required.map((item) => <li key={item}>{item}</li>)}</ul>
-        <button className="green" onClick={prepareIdeasFromConsigne}>Préparer mes 3 idées à partir de la consigne</button>
+        <button className="green" onClick={safePrepareIdeas}>Préparer mes 3 idées à partir de la consigne</button>
+        <p className="yellow"><b>Sécurité :</b> si tu as déjà écrit dans les cases, l’application demandera une confirmation avant de remplacer tes idées.</p>
       </div>
 
       <div className="card">
