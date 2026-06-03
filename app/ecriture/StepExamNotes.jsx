@@ -8,6 +8,15 @@ function defaultNotesFromSituation(preciseSituation) {
   }));
 }
 
+function hasNoteContent(notes) {
+  return (notes || []).some((row) =>
+    String(row?.info || "").trim() ||
+    String(row?.fact || "").trim() ||
+    String(row?.keyword || "").trim() ||
+    String(row?.opinionLink || "").trim()
+  );
+}
+
 export function createDefaultExamNotes(preciseSituation) {
   return defaultNotesFromSituation(preciseSituation);
 }
@@ -18,6 +27,10 @@ export default function StepExamNotes({ notes, setNotes, preciseSituation }) {
   }
 
   function resetNotes() {
+    if (hasNoteContent(notes)) {
+      const confirmReplace = window.confirm("Tu as déjà écrit dans ta feuille de notes. Veux-tu vraiment la remplacer par une feuille préparée à partir de la consigne ?");
+      if (!confirmReplace) return;
+    }
     setNotes(defaultNotesFromSituation(preciseSituation));
   }
 
@@ -26,6 +39,7 @@ export default function StepExamNotes({ notes, setNotes, preciseSituation }) {
       <h3>Feuille de notes — mode épreuve</h3>
       <p>Dans l’épreuve, tu n’écris pas avec le texte complet devant toi. Tu dois utiliser une feuille de notes. Cette section t’entraîne à garder seulement les informations utiles.</p>
       <button className="green" onClick={resetNotes}>Préparer une feuille de notes à partir de la consigne</button>
+      <p className="yellow"><b>Sécurité :</b> si tu as déjà écrit dans la feuille de notes, l’application demandera une confirmation avant de la remplacer.</p>
       {notes.map((row, index) => (
         <div className="card" key={row.id || index}>
           <h4>Note {index + 1}</h4>
