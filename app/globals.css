@@ -77,5 +77,11 @@ textarea{min-height:260px;font-size:18px;line-height:1.5;resize:vertical}
 .answerGuardHelp h3{margin-top:0}
 .answerGuardHelp li{margin:.45rem 0;line-height:1.4}
 .answerGuardActions{flex:0 0 auto;display:flex;align-items:center}
-@media(max-width:1000px){.three,.two,.cols,.adminGrid{grid-template-columns:1fr}.actionPanel,.adminHeader{align-items:stretch;flex-direction:column}.adminHeader form{align-self:flex-start}.answerGuard{top:115px;align-items:stretch;flex-direction:column;margin:10px 12px}.answerGuardActions button{width:100%;margin:0}}
-@media(max-width:700px){.page{padding:12px}.topnav{justify-content:center;flex-wrap:wrap;padding:8px}.topnav a{padding:8px 10px}.card{padding:15px;border-radius:15px}.hero{padding:20px}.selectionCard{min-height:auto}.modeBanner{align-items:flex-start;flex-direction:column}.stepNavigation button{width:100%;text-align:left}textarea{min-height:300px}.answerGuard{position:relative;top:auto;padding:15px}}
+.writingContract{border:2px solid #5277a8;background:#f6f9ff}
+.writingContract>h2{margin:.2rem 0 1rem}
+.writingChain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.writingChain>div{display:flex;flex-direction:column;gap:7px;padding:13px;border:1px solid #9baec7;border-radius:12px;background:white}
+.writingChain span{font-weight:400;line-height:1.4}
+.writingContractDetails{margin-top:14px;background:white}
+@media(max-width:1000px){.three,.two,.cols,.adminGrid{grid-template-columns:1fr}.actionPanel,.adminHeader{align-items:stretch;flex-direction:column}.adminHeader form{align-self:flex-start}.answerGuard{top:115px;align-items:stretch;flex-direction:column;margin:10px 12px}.answerGuardActions button{width:100%;margin:0}.writingChain{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.page{padding:12px}.topnav{justify-content:center;flex-wrap:wrap;padding:8px}.topnav a{padding:8px 10px}.card{padding:15px;border-radius:15px}.hero{padding:20px}.selectionCard{min-height:auto}.modeBanner{align-items:flex-start;flex-direction:column}.stepNavigation button{width:100%;text-align:left}textarea{min-height:300px}.answerGuard{position:relative;top:auto;padding:15px}.writingChain{grid-template-columns:1fr}}
