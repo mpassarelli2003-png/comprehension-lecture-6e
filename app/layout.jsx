@@ -1,5 +1,6 @@
 import "./globals.css";
 import ProgressiveAnswerGuard from "./ProgressiveAnswerGuard";
+import GuidedReadingCoach from "./GuidedReadingCoach";
 
 export const metadata = {
   title: "Compréhension de lecture — 6e, secondaire 1 et 2",
@@ -16,7 +17,9 @@ export default function RootLayout({ children }) {
           <a className="voiceHelpButton" href="/aide-vocale">Aide vocale IA</a>
           <a className="adminButton" href="/admin/login">Admin</a>
         </nav>
-        <ProgressiveAnswerGuard>{children}</ProgressiveAnswerGuard>
+        <ProgressiveAnswerGuard>
+          <GuidedReadingCoach>{children}</GuidedReadingCoach>
+        </ProgressiveAnswerGuard>
       </body>
     </html>
   );
