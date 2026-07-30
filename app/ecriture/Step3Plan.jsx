@@ -1,23 +1,23 @@
-function buildPlanFromIdeas(ideas, preciseSituation, situation) {
+function buildPlanFromIdeas(ideas, writingBrief) {
   const idea1 = ideas?.[0] || {};
   const idea2 = ideas?.[1] || {};
   const idea3 = ideas?.[2] || {};
-  const isOpinion = (preciseSituation?.suggestedType || situation?.id) === "opinion";
-  const isReaction = (preciseSituation?.suggestedType || situation?.id) === "reaction";
+  const isOpinion = writingBrief.typeId === "opinion";
+  const isReaction = writingBrief.typeId === "reaction";
 
   return {
     intro: isOpinion
-      ? `Sujet : ${preciseSituation?.task || ""}\nMon opinion : ${idea1.say || "Je pense que..."}`
+      ? `Destinataire : ${writingBrief.audience}\nSujet : ${writingBrief.sourceTitle}\nMon opinion : ${idea1.say || "Je pense que..."}`
       : isReaction
-        ? `Titre du texte : ${preciseSituation?.task || ""}\nMa réaction générale : ${idea1.say || "J’ai réagi parce que..."}`
-        : `Sujet à expliquer : ${preciseSituation?.task || ""}\nCe que je vais expliquer : ${idea1.say || "Je vais expliquer que..."}`,
-    dev1: `Idée 1 : ${idea2.say || idea1.say || ""}\nInformation du texte : ${idea2.know || idea1.know || ""}\nPreuve ou exemple : ${idea2.proof || idea1.proof || ""}\nLien avec la consigne : Cette idée aide à répondre parce que...`,
-    dev2: `Idée 2 : ${idea3.say || ""}\nInformation du texte : ${idea3.know || ""}\nPreuve ou exemple : ${idea3.proof || ""}\nLien avec la consigne : Cette idée complète ma réponse parce que...`,
+        ? `Titre du texte : ${writingBrief.sourceTitle}\nMa réaction générale : ${idea1.say || "J’ai réagi parce que..."}`
+        : `Sujet à expliquer : ${writingBrief.sourceTitle}\nCe que je vais expliquer : ${idea1.say || "Je vais expliquer que..."}`,
+    dev1: `Idée 1 : ${idea2.say || idea1.say || ""}\nInformation du texte : ${idea2.know || idea1.know || ""}\nPreuve ou exemple : ${idea2.proof || idea1.proof || ""}\nLien avec le but : Cette idée aide à ${writingBrief.purpose} parce que...`,
+    dev2: `Idée 2 : ${idea3.say || ""}\nInformation du texte : ${idea3.know || ""}\nPreuve ou exemple : ${idea3.proof || ""}\nLien avec le but : Cette idée complète mon texte parce que...`,
     conclusion: isOpinion
-      ? "Je rappelle mon opinion : ...\nJe termine avec une phrase qui fait réfléchir le lecteur."
+      ? "Je rappelle mon opinion : ...\nJe termine avec une recommandation, un appel à l’action ou une phrase forte."
       : isReaction
-        ? "Je résume ma réaction : ...\nJe termine en disant ce que le texte m’a fait comprendre."
-        : "Je résume l’explication principale : ...\nJe termine avec une idée importante à retenir."
+        ? "Je résume ma réaction : ...\nJe termine en disant ce que le texte m’a fait comprendre ou retenir."
+        : "Je résume l’explication principale : ...\nJe termine avec l’idée importante à retenir."
   };
 }
 
@@ -25,72 +25,59 @@ function hasPlanContent(plan) {
   return [plan.intro, plan.dev1, plan.dev2, plan.conclusion].some((part) => String(part || "").trim());
 }
 
-export default function Step3Plan({ situation, preciseSituation, ideas, plan, setPlan, readyForPlan }) {
-  const introOk = plan.intro.trim().length > 0;
-  const dev1Ok = plan.dev1.trim().length > 0;
-  const dev2Ok = plan.dev2.trim().length > 0;
-  const conclusionOk = plan.conclusion.trim().length > 0;
-  const completeCount = [introOk, dev1Ok, dev2Ok, conclusionOk].filter(Boolean).length;
+export default function Step3Plan({ writingBrief, ideas, plan, setPlan, readyForPlan }) {
+  const parts = ["intro", "dev1", "dev2", "conclusion"];
+  const completeCount = parts.filter((key) => String(plan[key] || "").trim()).length;
 
   function fillPlan() {
     if (hasPlanContent(plan)) {
-      const confirmReplace = window.confirm("Tu as déjà écrit dans ton plan. Veux-tu vraiment remplacer ton plan par un plan généré à partir de tes idées ?");
+      const confirmReplace = window.confirm("Tu as déjà écrit dans ton plan. Veux-tu vraiment le remplacer par un plan synchronisé avec le type de texte et tes idées ?");
       if (!confirmReplace) return;
     }
-    setPlan(buildPlanFromIdeas(ideas, preciseSituation, situation));
+    setPlan(buildPlanFromIdeas(ideas, writingBrief));
   }
 
   return (
     <div>
       <h2>Étape 3 — Je construis mon plan</h2>
-
-      <div className="card yellow">
-        <b>But de cette étape</b>
-        <p>Le plan sert à placer tes idées avant d’écrire. Il t’aide à répondre à la consigne, à éviter les répétitions et à garder un ordre logique.</p>
-      </div>
+      <div className="card yellow"><b>But de cette étape</b><p>Le plan doit suivre le type de texte, la consigne, le destinataire et le but affichés dans le contrat d’écriture.</p></div>
 
       <div className="card green">
-        <b>Méthode orthopédagogique : 1 idée par bloc</b>
-        <p><b>Introduction :</b> je présente le sujet et ce que je vais dire.</p>
-        <p><b>Développement 1 :</b> je développe ma première idée avec une preuve.</p>
-        <p><b>Développement 2 :</b> je développe ma deuxième idée avec une preuve.</p>
-        <p><b>Conclusion :</b> je rappelle l’idée importante sans ajouter un nouveau sujet.</p>
+        <b>Plan synchronisé pour : {writingBrief.type}</b>
+        {writingBrief.plan.map((part) => <p key={part.id}><b>{part.label} :</b> {part.instruction}</p>)}
       </div>
 
       <div className="card">
         <b>Consigne à garder en tête</b>
-        <p>{preciseSituation.task}</p>
-        <b>Plan suggéré pour : {situation.title}</b>
-        {situation.plan.map((item) => <p key={item}>{item}</p>)}
+        <p>{writingBrief.task}</p>
+        <p><b>Destinataire :</b> {writingBrief.audience}</p>
+        <p><b>But :</b> {writingBrief.purpose}</p>
       </div>
 
       <div className="card">
         <b>Mes idées de l’étape 2</b>
-        {ideas.map((idea, index) => (
-          <p key={index}><b>{idea.role || `Idée ${index + 1}`} :</b> {idea.say || "À compléter"} {idea.proof ? `— preuve : ${idea.proof}` : ""}</p>
-        ))}
-        <button className="green" onClick={fillPlan}>Transformer mes idées en plan</button>
-        <p className="yellow"><b>Sécurité :</b> si tu as déjà écrit dans ton plan, l’application demandera une confirmation avant de le remplacer.</p>
-        {!readyForPlan && <p className="yellow"><b>Attention :</b> ton plan sera meilleur si tu complètes au moins 2 idées et 1 preuve à l’étape 2.</p>}
+        {ideas.map((idea, index) => <p key={index}><b>{idea.role || `Idée ${index + 1}`} :</b> {idea.say || "À compléter"} {idea.proof ? `— preuve : ${idea.proof}` : ""}</p>)}
+        <button className="green" onClick={fillPlan}>Transformer mes idées en plan synchronisé</button>
+        <p className="yellow"><b>Sécurité :</b> l’application demande une confirmation avant de remplacer un plan déjà commencé.</p>
+        {!readyForPlan && <p className="yellow"><b>Attention :</b> complète au moins 2 idées et 1 preuve à l’étape 2.</p>}
       </div>
 
       <div className="card">
         <b>Validation du plan</b>
         <p>Parties commencées : <b>{completeCount}</b> / 4</p>
-        <p className={completeCount === 4 ? "green" : "yellow"}><b>{completeCount === 4 ? "Plan complet." : "Plan à compléter."}</b> Avant le brouillon, vise les 4 parties du texte.</p>
+        <p className={completeCount === 4 ? "green" : "yellow"}><b>{completeCount === 4 ? "Plan complet." : "Plan à compléter."}</b></p>
       </div>
 
-      <label>Introduction : sujet + intention + opinion ou idée principale</label>
-      <textarea value={plan.intro} onChange={(e) => setPlan({...plan, intro: e.target.value})} placeholder="J’annonce le sujet. Je dis ce que je vais expliquer, défendre ou apprécier." />
-
-      <label>Développement 1 : première idée + preuve</label>
-      <textarea value={plan.dev1} onChange={(e) => setPlan({...plan, dev1: e.target.value})} placeholder="J’écris ma première idée. J’ajoute une preuve ou un exemple du texte." />
-
-      <label>Développement 2 : deuxième idée + preuve</label>
-      <textarea value={plan.dev2} onChange={(e) => setPlan({...plan, dev2: e.target.value})} placeholder="J’écris ma deuxième idée. J’ajoute une preuve ou un exemple du texte." />
-
-      <label>Conclusion : rappel + phrase finale</label>
-      <textarea value={plan.conclusion} onChange={(e) => setPlan({...plan, conclusion: e.target.value})} placeholder="Je rappelle l’idée principale. Je termine sans ajouter une nouvelle idée." />
+      {writingBrief.plan.map((part) => (
+        <div key={part.id}>
+          <label>{part.label} — {part.instruction}</label>
+          <textarea
+            value={plan[part.id] || ""}
+            onChange={(event) => setPlan({ ...plan, [part.id]: event.target.value })}
+            placeholder={part.instruction}
+          />
+        </div>
+      ))}
     </div>
   );
 }
