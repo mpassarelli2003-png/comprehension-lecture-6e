@@ -1,1 +1,73 @@
-body{margin:0;background:white;font-family:Arial,sans-serif;color:black}.topnav{position:sticky;top:0;z-index:1000;display:flex;gap:10px;align-items:center;justify-content:flex-end;padding:10px 20px;background:white;border-bottom:1px solid lightgray}.topnav a{text-decoration:none;color:black;border:1px solid gray;border-radius:999px;padding:10px 14px;font-weight:bold}.voiceHelpButton{background:lightgreen}.homeButton{background:lightblue}button{padding:10px;margin:4px;border-radius:12px;border:1px solid gray;background:white}.page{padding:20px}.card{border:1px solid lightgray;border-radius:20px;padding:20px;margin:10px}.grid{display:grid;gap:12px}.three{grid-template-columns:repeat(3,1fr)}.cols{grid-template-columns:1fr 1fr}.reader{font-size:18px;line-height:1.8}.big{font-size:22px}.spaced{line-height:2.3}.para{border:1px solid lightgray;border-radius:15px;padding:12px;margin:10px}.paragraphSubtitle{display:inline-block;background:#e8f5e9;border:1px solid #8bc34a;border-radius:999px;padding:6px 12px;margin:0 0 8px 0;font-size:16px}.sentenceMarker{border-radius:6px;padding:1px 2px;transition:background .12s,box-shadow .12s}.markerActive{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ctext y='20' font-size='20'%3E%F0%9F%96%8D%EF%B8%8F%3C/text%3E%3C/svg%3E") 2 20, pointer}.markerActive:hover{background:#fff3b0;box-shadow:0 0 0 2px #f6d94a inset}.highlightedSentence{background:#fff176;box-shadow:0 0 0 2px #f6d94a inset}.highlighterButton{font-size:18px;border:2px solid #d0b400;background:white}.activeHighlighter{background:#fff176;border-color:#b59a00;font-weight:bold;box-shadow:0 0 0 3px #fff59d}textarea,input,select{width:100%;padding:10px;border:1px solid gray;border-radius:10px;margin:6px 0}textarea{min-height:260px;font-size:18px;line-height:1.5;resize:vertical}.blue{background:lightblue}.green{background:lightgreen}.yellow{background:lightyellow}.pink{background:pink}.violet{background:lavender}@media(max-width:900px){.three,.cols{grid-template-columns:1fr}textarea{min-height:300px}.topnav{justify-content:center;flex-wrap:wrap}}
+*{box-sizing:border-box}
+body{margin:0;background:#f7f8fa;font-family:Arial,sans-serif;color:#111}
+a{color:inherit}
+.topnav{position:sticky;top:0;z-index:1000;display:flex;gap:10px;align-items:center;justify-content:flex-end;padding:10px 20px;background:white;border-bottom:1px solid #d8dce2}
+.topnav a{text-decoration:none;color:#111;border:1px solid #7f8792;border-radius:999px;padding:10px 14px;font-weight:bold}
+.voiceHelpButton{background:lightgreen}
+.homeButton{background:lightblue}
+.writingButton{background:#fff6c7}
+.adminButton{background:lavender}
+button,.buttonLink{padding:10px 14px;margin:4px;border-radius:12px;border:1px solid #707782;background:white;font:inherit;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block}
+button:disabled{cursor:not-allowed;opacity:.55}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:4px solid #2d6cdf;outline-offset:2px}
+.page{padding:20px;max-width:1500px;margin:0 auto}
+.narrowPage{max-width:720px}
+.card{background:white;border:1px solid #d8dce2;border-radius:20px;padding:20px;margin:10px 0;box-shadow:0 2px 8px rgba(18,31,53,.05)}
+.grid{display:grid;gap:12px}
+.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cols{grid-template-columns:minmax(0,1fr) minmax(340px,.8fr)}
+.hero{padding:30px}
+.hero h1{font-size:clamp(2rem,5vw,3.6rem);max-width:900px;margin:.2em 0}
+.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.82rem;font-weight:800;color:#4f5968}
+.selectionGrid{display:grid;gap:12px}
+.selectionCard{min-height:170px;text-align:left;display:flex;flex-direction:column;gap:10px;justify-content:flex-start;padding:20px;background:#fff}
+.selectionCard b{font-size:1.3rem}
+.selectionCard span{font-weight:400;line-height:1.45}
+.selectionCard small{margin-top:auto;color:#4f5968}
+.selectedCard{border:3px solid #2d6cdf;background:#eef5ff;box-shadow:0 0 0 3px rgba(45,108,223,.12)}
+.actionPanel{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.primaryButton{font-size:1.05rem;padding:13px 18px}
+.emptyState{text-align:center;padding:40px}
+.topControls{position:relative}
+.controlButtons{display:flex;flex-wrap:wrap;gap:4px}
+.statusBadges{display:flex;gap:8px;flex-wrap:wrap;margin:12px 4px}
+.badge{display:inline-flex;align-items:center;border:1px solid #737b86;border-radius:999px;padding:7px 11px;font-weight:700;background:#f4f5f7}
+.modeBanner{display:flex;align-items:center;gap:12px;border-radius:16px;padding:14px 18px;margin:10px 0;border:2px solid}
+.modeBanner span{font-weight:400}
+.trainingBanner{background:#e9f8eb;border-color:#4a9b53}
+.simulationBanner{background:#f2eefe;border-color:#7356b6}
+.stepNavigation{display:flex;gap:6px;flex-wrap:wrap}
+.reader{font-size:18px;line-height:1.8}
+.big{font-size:22px}
+.spaced{line-height:2.3}
+.para{border:1px solid #d8dce2;border-radius:15px;padding:12px;margin:10px 0;background:#fff}
+.paragraphSubtitle{display:inline-block;background:#e8f5e9;border:1px solid #8bc34a;border-radius:999px;padding:6px 12px;margin:0 0 8px;font-size:16px}
+.sentenceMarker{border-radius:6px;padding:1px 2px;transition:background .12s,box-shadow .12s}
+.markerActive{cursor:pointer}
+.markerActive:hover{background:#fff3b0;box-shadow:0 0 0 2px #f6d94a inset}
+.highlightedSentence{background:#fff176;box-shadow:0 0 0 2px #f6d94a inset}
+.highlighterButton{font-size:18px;border:2px solid #d0b400;background:white}
+.activeHighlighter{background:#fff176;border-color:#8d7800;font-weight:bold;box-shadow:0 0 0 3px #fff59d}
+textarea,input,select{width:100%;padding:11px;border:1px solid #707782;border-radius:10px;margin:6px 0;font:inherit;background:white}
+textarea{min-height:260px;font-size:18px;line-height:1.5;resize:vertical}
+.choiceLine,.adminToggle{display:flex;gap:10px;align-items:flex-start;margin:10px 0;padding:9px;border-radius:10px}
+.choiceLine:hover,.adminToggle:hover{background:#f4f6f8}
+.choiceLine input,.adminToggle input{width:auto;margin-top:3px;transform:scale(1.25)}
+.statusBox{border:1px solid #7d8795;border-radius:14px;padding:14px;margin:12px 0;background:#f4f6f8}
+.warningBox{background:#fff7d6;border-color:#b99000}
+.errorBox{background:#ffe6e6;border-color:#b43b3b}
+.successBox{background:#e4f6e7;border-color:#438a4c}
+.simulationBox{background:#f2eefe;border-color:#7356b6}
+.blue{background:lightblue}
+.green{background:lightgreen}
+.yellow{background:lightyellow}
+.pink{background:pink}
+.violet{background:lavender}
+.adminHeader{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.adminGrid{display:grid;grid-template-columns:minmax(320px,.75fr) minmax(0,1.25fr);gap:16px}
+.adminJson{min-height:620px;font-family:Consolas,Monaco,monospace;font-size:14px}
+.adminLoginCard{margin-top:8vh;padding:32px}
+.textLink{display:inline-block;margin-top:18px;font-weight:700}
+@media(max-width:1000px){.three,.two,.cols,.adminGrid{grid-template-columns:1fr}.actionPanel,.adminHeader{align-items:stretch;flex-direction:column}.adminHeader form{align-self:flex-start}}
+@media(max-width:700px){.page{padding:12px}.topnav{justify-content:center;flex-wrap:wrap;padding:8px}.topnav a{padding:8px 10px}.card{padding:15px;border-radius:15px}.hero{padding:20px}.selectionCard{min-height:auto}.modeBanner{align-items:flex-start;flex-direction:column}.stepNavigation button{width:100%;text-align:left}textarea{min-height:300px}}
