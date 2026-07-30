@@ -7,8 +7,11 @@ import {
   buildReadingStrategy,
   detectStrategyLevel,
   detectStrategyMode,
+  countEvidenceForExercise,
   makeStrategyKey,
-  phaseForStep
+  missingEvidenceCount,
+  phaseForStep,
+  shouldBlockForEvidence
 } from "../lib/readingStrategies";
 
 const PHASE_ORDER = ["understand", "find", "respond"];
@@ -207,24 +210,27 @@ export default function GuidedReadingCoach({ children }) {
       const summary = readSubmissionSummary(button);
       if (!summary) return;
       const title = textOf(document.querySelector("main .grid.cols > section.card h1")) || context?.exerciseTitle || "Lecture";
-      const prefix = `${title}|Question`;
-      const suffix = `|${context?.levelId || "6e"}|${context?.modeId || "simulation"}`;
-      const withEvidence = Object.entries(records).filter(([key, value]) => key.startsWith(prefix) && key.endsWith(suffix) && value?.evidenceSaved).length;
-      if (withEvidence < summary.total) {
-        blockForMissingEvidence(event, `La remise est bloquée : ${summary.total - withEvidence} question(s) n’ont pas encore de passage ou de note du texte.`);
+      const withEvidence = countEvidenceForExercise(records, {
+        exerciseTitle: title,
+        levelId: context?.levelId || "6e",
+        modeId: context?.modeId || "simulation"
+      });
+      const missing = missingEvidenceCount(summary.total, withEvidence);
+      if (missing > 0) {
+        blockForMissingEvidence(event, `La remise est bloquée : ${missing} question(s) n’ont pas encore de passage ou de note du texte.`);
       }
       return;
     }
 
     if (!context?.hasQuestion || !strategy?.needsEvidence) return;
 
-    if (label === "Question suivante" && !evidenceSaved) {
+    if (label === "Question suivante" && shouldBlockForEvidence({ action: "next-question", currentStep: context.step, evidenceSaved, needsEvidence: strategy.needsEvidence })) {
       blockForMissingEvidence(event, "Avant de passer à la question suivante, enregistre au moins un passage ou un indice du texte à l’étape 4 — Trouver.");
       return;
     }
 
     const nextStep = targetStep(button);
-    if (nextStep >= 5 && nextStep > context.step && !evidenceSaved) {
+    if (shouldBlockForEvidence({ action: "step", currentStep: context.step, targetStep: nextStep, evidenceSaved, needsEvidence: strategy.needsEvidence })) {
       blockForMissingEvidence(event, "Avant de rédiger ou de remettre, passe par l’étape 4 et conserve au moins un appui du texte.");
     }
   }
