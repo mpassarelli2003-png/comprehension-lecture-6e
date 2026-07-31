@@ -12,16 +12,43 @@ import {
   normalizeExerciseLevel,
   sanitizeAdminSettings
 } from "../../lib/learningConfig";
+import {
+  QUESTION_DIMENSIONS,
+  QUESTION_TYPES,
+  normalizeExerciseQuestions,
+  summarizeQuestionBank,
+  validateQuestionSchema
+} from "../../lib/questionClassification";
 
-const exercises = [...baseExercises, ...moreExercises, genesisExercise];
+const rawExercises = [...baseExercises, ...moreExercises, genesisExercise];
+const exercises = rawExercises.map(normalizeExerciseQuestions);
 
 function validateExercise(value) {
   const required = ["id", "title", "level", "textType", "category", "intention", "text"];
   const missing = required.filter((key) => !String(value?.[key] || "").trim());
-  if (missing.length) return `Champs manquants : ${missing.join(", ")}.`;
-  if (!Array.isArray(value.questions) || value.questions.length === 0) return "Ajoute au moins une question.";
-  if (value.questions.some((question) => !question?.id || !question?.prompt)) return "Chaque question doit avoir un id et une consigne.";
-  return "Exercice valide pour un aperçu local.";
+  if (missing.length) return { valid: false, message: `Champs manquants : ${missing.join(", ")}.`, exercise: value };
+  if (!Array.isArray(value.questions) || value.questions.length === 0) return { valid: false, message: "Ajoute au moins une question.", exercise: value };
+
+  const normalized = normalizeExerciseQuestions(value);
+  const invalid = normalized.questions
+    .map((question, index) => ({ index, result: validateQuestionSchema(question) }))
+    .filter(({ result }) => !result.valid);
+
+  if (invalid.length) {
+    const details = invalid.map(({ index, result }) => `Q${index + 1} : ${result.errors.join(", ")}`).join("; ");
+    return { valid: false, message: `Questions invalides — ${details}.`, exercise: normalized };
+  }
+
+  const dimensions = new Set(normalized.questions.map((question) => question.dimension)).size;
+  return {
+    valid: true,
+    message: `Exercice valide : ${normalized.questions.length} question(s), ${dimensions} dimension(s), classification structurée appliquée.`,
+    exercise: normalized
+  };
+}
+
+function countLabel(count) {
+  return `${count} question${count > 1 ? "s" : ""}`;
 }
 
 export default function AdminWorkspace() {
@@ -41,6 +68,7 @@ export default function AdminWorkspace() {
   const counts = useMemo(() => Object.fromEntries(
     LEVELS.map((level) => [level.id, exercises.filter((exercise) => normalizeExerciseLevel(exercise.level) === level.id).length])
   ), []);
+  const bankSummary = useMemo(() => summarizeQuestionBank(exercises), []);
 
   function toggleSetting(kind, id) {
     const key = kind === "level" ? "enabledLevels" : "enabledModes";
@@ -69,9 +97,20 @@ export default function AdminWorkspace() {
     setJsonMessage("");
   }
 
+  function classifyJson() {
+    try {
+      const normalized = normalizeExerciseQuestions(JSON.parse(json));
+      setJson(JSON.stringify(normalized, null, 2));
+      const result = validateExercise(normalized);
+      setJsonMessage(result.message);
+    } catch (error) {
+      setJsonMessage(`JSON invalide : ${error.message}`);
+    }
+  }
+
   function validateJson() {
     try {
-      setJsonMessage(validateExercise(JSON.parse(json)));
+      setJsonMessage(validateExercise(JSON.parse(json)).message);
     } catch (error) {
       setJsonMessage(`JSON invalide : ${error.message}`);
     }
@@ -79,15 +118,15 @@ export default function AdminWorkspace() {
 
   function downloadJson() {
     try {
-      const value = JSON.parse(json);
-      const message = validateExercise(value);
-      setJsonMessage(message);
-      if (!message.startsWith("Exercice valide")) return;
-      const blob = new Blob([JSON.stringify(value, null, 2)], { type: "application/json" });
+      const result = validateExercise(JSON.parse(json));
+      setJsonMessage(result.message);
+      if (!result.valid) return;
+      setJson(JSON.stringify(result.exercise, null, 2));
+      const blob = new Blob([JSON.stringify(result.exercise, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${value.id || "exercice"}.json`;
+      link.download = `${result.exercise.id || "exercice"}.json`;
       link.click();
       URL.revokeObjectURL(url);
     } catch (error) {
@@ -137,6 +176,18 @@ export default function AdminWorkspace() {
 
         <button className="green primaryButton" onClick={saveSettings}>Enregistrer les réglages</button>
         {settingsMessage && <p className="statusBox" role="status">{settingsMessage}</p>}
+
+        <div className="card questionBankSummary">
+          <h2>Banque de questions structurée</h2>
+          <p><b>Total :</b> {countLabel(bankSummary.total)}</p>
+          <h3>Dimensions</h3>
+          {Object.entries(QUESTION_DIMENSIONS).map(([id, value]) => <p key={id}><b>{value.label} :</b> {bankSummary.byDimension[id]}</p>)}
+          <h3>Types</h3>
+          {Object.entries(QUESTION_TYPES).map(([id, label]) => <p key={id}><b>{label} :</b> {bankSummary.byType[id]}</p>)}
+          <p><b>Preuve obligatoire :</b> {bankSummary.proofRequired}</p>
+          <p><b>Justification obligatoire :</b> {bankSummary.justificationRequired}</p>
+          <p className="yellow">Les questions existantes sont classées automatiquement sans exposer les réponses attendues aux élèves.</p>
+        </div>
       </section>
 
       <section className="card">
@@ -153,8 +204,9 @@ export default function AdminWorkspace() {
           ))}
         </select>
         <textarea className="adminJson" value={json} onChange={(event) => setJson(event.target.value)} spellCheck="false" />
+        <button className="violet" onClick={classifyJson}>Classifier les questions</button>
         <button className="blue" onClick={validateJson}>Valider le JSON</button>
-        <button className="green" onClick={downloadJson}>Télécharger le JSON</button>
+        <button className="green" onClick={downloadJson}>Télécharger le JSON structuré</button>
         {jsonMessage && <p className="statusBox" role="status">{jsonMessage}</p>}
       </section>
     </div>
