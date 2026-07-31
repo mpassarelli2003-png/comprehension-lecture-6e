@@ -7,7 +7,7 @@
     "test:block5": "node tests/block5-question-classification.mjs && node tests/block5-bank-audit.mjs",
     "test:block6": "node tests/block6-formative-feedback.mjs && node tests/block6-feedback-audit.mjs && node tests/block6-integration-audit.mjs && node tests/block6-real-question-scenarios.mjs",
     "test:block7": "node tests/block7-progress-tracking.mjs && node tests/block7-integration-audit.mjs",
-    "prebuild": "node tests/block7-integration-audit.mjs",
+    "prebuild": "npm run test:block5 && npm run test:block6 && npm run test:block7",
     "build": "next build",
     "start": "next start"
   },
