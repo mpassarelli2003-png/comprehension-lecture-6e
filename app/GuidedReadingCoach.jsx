@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import baseExercises from "./data/exercises";
 import moreExercises from "./data/moreExercises";
 import genesisExercise from "./data/genesisExercise";
+import { normalizeExerciseQuestions } from "../lib/questionClassification";
 import {
   READING_STRATEGY_STORAGE_KEY,
   buildReadingStrategy,
@@ -19,7 +20,7 @@ import {
 } from "../lib/readingStrategies";
 
 const PHASE_ORDER = ["understand", "find", "respond"];
-const exercises = [...baseExercises, ...moreExercises, genesisExercise];
+const exercises = [...baseExercises, ...moreExercises, genesisExercise].map(normalizeExerciseQuestions);
 const STUDENT_WORK_KEYS = [
   "lecture_student_work_v9",
   "lecture6e_student_work_v8",
@@ -68,6 +69,23 @@ function studentWorkIsEmpty(work) {
   return !hasProof && !hasAnswer;
 }
 
+function compactQuestionModel(question = {}, fallback = {}) {
+  return {
+    id: question.id || fallback.id || "",
+    prompt: question.prompt || fallback.prompt || "",
+    type: question.type || fallback.type || "comprendre",
+    points: Number(question.points || fallback.points || 1),
+    proofTypeSuggested: question.proofTypeSuggested || "",
+    dimension: question.dimension || "",
+    questionType: question.questionType || "",
+    proofRequired: typeof question.proofRequired === "boolean" ? question.proofRequired : undefined,
+    justificationRequired: typeof question.justificationRequired === "boolean" ? question.justificationRequired : undefined,
+    minimumExpectedElements: Number(question.minimumExpectedElements || 0) || undefined,
+    targetLevel: question.targetLevel || fallback.levelId || "6e",
+    validationProfile: question.validationProfile || null
+  };
+}
+
 function parseQuestionContext() {
   if (typeof document === "undefined") return null;
   const activeStep = document.querySelector(".stepNavigation button.blue");
@@ -92,15 +110,18 @@ function parseQuestionContext() {
   const countMatch = numberText.match(/Question\s+(\d+)\s*\/\s*(\d+)/i);
   const questionIndex = Number(countMatch?.[1] || 1);
   const prompt = textOf(questionCard.querySelector("h2"));
-  const questionData = exerciseData?.questions?.[questionIndex - 1]
-    || exerciseData?.questions?.find((item) => textOf({ textContent: item.prompt }) === prompt);
   const meta = Array.from(questionCard.querySelectorAll("p")).map(textOf).find((value) => /point\(s\)|point/i.test(value)) || "comprendre — 1 point";
   const metaParts = meta.split(/\s+—\s+/);
-  const type = questionData?.type || metaParts[0] || "comprendre";
   const pointsMatch = meta.match(/(\d+)\s*point/i);
-  const points = Number(questionData?.points || pointsMatch?.[1] || 1);
-  const questionId = questionData?.id || "";
-  const proofTypeSuggested = questionData?.proofTypeSuggested || "";
+  const questionData = exerciseData?.questions?.[questionIndex - 1]
+    || exerciseData?.questions?.find((item) => String(item.prompt || "").trim() === prompt);
+  const question = compactQuestionModel(questionData, {
+    prompt,
+    type: metaParts[0] || "comprendre",
+    points: Number(pointsMatch?.[1] || 1),
+    levelId
+  });
+  const questionId = question.id;
   const proofSectionVisible = textOf(rightColumn).includes("Mes passages sauvegardés");
   const domProofCount = Array.from(rightColumn?.querySelectorAll("button") || []).filter((button) => textOf(button).includes("Utiliser dans ma réponse")).length;
   const savedEvidence = hasEvidenceForQuestion(studentWork, { exerciseId, modeId, questionId });
@@ -120,9 +141,7 @@ function parseQuestionContext() {
     questionIndex,
     totalQuestions: Number(countMatch?.[2] || 1),
     prompt,
-    type,
-    points,
-    proofTypeSuggested,
+    question,
     proofCount,
     proofSectionVisible
   };
@@ -145,14 +164,7 @@ function synchronizeDisplayedQuestionWord(context) {
   const rightColumn = columns[1];
   const paragraph = Array.from(rightColumn?.querySelectorAll("p.yellow") || []).find((item) => textOf(item).startsWith("Mot-question"));
   if (!paragraph) return;
-  const strategy = buildReadingStrategy({
-    prompt: context.prompt,
-    type: context.type,
-    proofTypeSuggested: context.proofTypeSuggested,
-    points: context.points,
-    levelId: context.levelId,
-    modeId: context.modeId
-  });
+  const strategy = buildReadingStrategy({ question: context.question, levelId: context.levelId, modeId: context.modeId });
   const expected = `Mot-question : ${strategy.questionWord}. ${strategy.questionWordHelp}`;
   if (textOf(paragraph) !== expected) paragraph.textContent = expected;
 }
@@ -230,14 +242,7 @@ export default function GuidedReadingCoach({ children }) {
   const record = context?.key ? records[context.key] || {} : {};
   const strategy = useMemo(() => {
     if (!context?.hasQuestion) return null;
-    return buildReadingStrategy({
-      prompt: context.prompt,
-      type: context.type,
-      proofTypeSuggested: context.proofTypeSuggested,
-      points: context.points,
-      levelId: context.levelId,
-      modeId: context.modeId
-    });
+    return buildReadingStrategy({ question: context.question, levelId: context.levelId, modeId: context.modeId });
   }, [context]);
   const activePhase = phaseForStep(context?.step || 3);
   const evidenceSaved = Boolean(context?.proofCount > 0);
@@ -284,13 +289,16 @@ export default function GuidedReadingCoach({ children }) {
       const summary = readSubmissionSummary(button);
       if (!summary) return;
       const studentWork = loadStudentWork();
+      const exerciseData = exercises.find((item) => item.id === (context?.exerciseId || studentWork?.exerciseId));
+      const requiredQuestionIds = (exerciseData?.questions || []).filter((question) => question.proofRequired).map((question) => question.id);
       const withEvidence = countEvidenceInStudentWork(studentWork, {
         exerciseId: context?.exerciseId || studentWork?.exerciseId || "",
-        modeId: context?.modeId || "simulation"
+        modeId: context?.modeId || "simulation",
+        questionIds: requiredQuestionIds
       });
-      const missing = missingEvidenceCount(summary.total, withEvidence);
+      const missing = missingEvidenceCount(requiredQuestionIds.length, withEvidence);
       if (missing > 0) {
-        blockForMissingEvidence(event, `La remise est bloquée : ${missing} question(s) n’ont pas encore de passage ou de note du texte.`);
+        blockForMissingEvidence(event, `La remise est bloquée : ${missing} question(s) exigent encore un passage ou une note du texte.`);
       }
       return;
     }
@@ -329,8 +337,11 @@ export default function GuidedReadingCoach({ children }) {
             </div>
             <div className="readingCoachBadges">
               <span className="badge">{strategy.procedureOnly ? "Procédure seulement" : strategy.dimension.label}</span>
-              {!strategy.procedureOnly && <span className="badge">{strategy.dimension.nature}</span>}
-              <span className={`badge ${evidenceSaved ? "green" : "yellow"}`}>{evidenceSaved ? "Appui du texte enregistré" : "Appui du texte requis"}</span>
+              {!strategy.procedureOnly && <span className="badge">{strategy.questionTypeLabel}</span>}
+              <span className="badge">Au moins {strategy.minimumExpectedElements} élément{strategy.minimumExpectedElements > 1 ? "s" : ""}</span>
+              <span className={`badge ${strategy.needsEvidence && !evidenceSaved ? "yellow" : "green"}`}>
+                {!strategy.needsEvidence ? "Appui facultatif" : evidenceSaved ? "Appui du texte enregistré" : "Appui du texte requis"}
+              </span>
             </div>
           </div>
 
@@ -356,10 +367,11 @@ export default function GuidedReadingCoach({ children }) {
           <div className="readingCoachFooter">
             <div>
               {strategy.procedureOnly ? (
-                <p><b>Mode simulation :</b> aucune réponse ni aucun indice de contenu n’est fourni. Seule la démarche est rappelée.</p>
+                <p><b>Mode simulation :</b> aucune réponse ni aucun indice de contenu n’est fourni. Seule la démarche et les exigences de forme sont rappelées.</p>
               ) : (
                 <>
                   <p><b>Mot-question :</b> {strategy.questionWord} — {strategy.questionWordHelp}</p>
+                  <p><b>Type de réponse :</b> {strategy.questionTypeLabel}.</p>
                   <p><b>Outil conseillé :</b> {strategy.recommendedProofLabel}.</p>
                   <p><b>Niveau :</b> {strategy.levelLabel}. {strategy.needsJustification ? "Une justification est attendue." : "Une réponse directe et complète est attendue."}</p>
                 </>
@@ -367,7 +379,7 @@ export default function GuidedReadingCoach({ children }) {
             </div>
             <div className="readingCoachActions">
               <button type="button" onClick={() => setExpanded(!expanded)}>{expanded ? "Masquer l’aide détaillée" : "Afficher l’aide de cette étape"}</button>
-              {!evidenceSaved && <button type="button" className="yellow" onClick={goToFindStep}>Aller à l’étape 4 — Trouver</button>}
+              {strategy.needsEvidence && !evidenceSaved && <button type="button" className="yellow" onClick={goToFindStep}>Aller à l’étape 4 — Trouver</button>}
               {activePhase === "respond" && <button type="button" className="green" onClick={focusAnswer}>Retourner à ma réponse</button>}
             </div>
           </div>
