@@ -16,6 +16,8 @@ import {
 } from "../../lib/manualPedagogicalAudit";
 import { useExerciseBank } from "../useExerciseBank";
 
+const MANUAL_AUDIT_CHANGE_EVENT = "lecture-manual-pedagogical-audit-changed";
+
 function loadStore(exercises) {
   if (typeof window === "undefined") return normalizeManualAuditStore(null, exercises);
   try {
@@ -74,6 +76,7 @@ export default function ManualPedagogicalAuditPanel() {
   useEffect(() => {
     if (!hydrated || typeof window === "undefined") return;
     localStorage.setItem(MANUAL_PEDAGOGICAL_AUDIT_KEY, JSON.stringify(store));
+    window.dispatchEvent(new CustomEvent(MANUAL_AUDIT_CHANGE_EVENT, { detail: { store } }));
   }, [hydrated, store]);
 
   const summary = useMemo(() => summarizeManualAudits(store, exercises), [store, exercises]);
