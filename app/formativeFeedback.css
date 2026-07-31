@@ -1,0 +1,24 @@
+.formativeFeedback{max-width:1450px;margin:12px auto;padding:18px 20px;border:3px solid #8a6b00;border-radius:18px;background:#fff9df;box-shadow:0 6px 24px rgba(55,43,0,.14)}
+.formativeStatus-missing{border-color:#a33a2b;background:#fff0ed}
+.formativeStatus-partial{border-color:#9b7300;background:#fff9df}
+.formativeStatus-acceptable{border-color:#367c45;background:#eef9f0}
+.formativeStatus-strong{border-color:#276c76;background:#eaf8fa}
+.formativeFeedbackHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.formativeFeedbackHeader h2{margin:.15rem 0 .35rem;font-size:clamp(1.3rem,2vw,1.75rem)}
+.formativeFeedbackHeader p{margin:.3rem 0}
+.formativeFeedbackGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.formativeFeedbackGrid>div{padding:13px;border:1px solid #a9adb4;border-radius:13px;background:white}
+.formativeFeedbackGrid h3{margin:.1rem 0 .6rem}
+.formativeFeedbackGrid p{margin:.45rem 0;line-height:1.45}
+.formativeNextStep{border-width:2px!important;border-color:#2d6cdf!important;background:#f2f7ff!important}
+.formativeFeedbackActions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;margin-top:12px}
+.formativeSubmission{border-color:#a33a2b;background:#fff0ed}
+.formativeSubmission h2{margin:.15rem 0 .55rem}
+.questionFeedbackAdmin{border:2px solid #6b5a94;background:#f7f3ff}
+.questionFeedbackAdminGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.questionFeedbackAdminGrid p{margin:.35rem 0}
+.feedbackPreviewList{display:grid;gap:8px;margin-top:10px}
+.feedbackPreviewList>div{padding:10px;border:1px solid #b6abc9;border-radius:10px;background:white}
+.feedbackPreviewList p{margin:.25rem 0;line-height:1.4}
+@media(max-width:1000px){.formativeFeedback{margin:10px 12px}.formativeFeedbackGrid{grid-template-columns:1fr}.formativeFeedbackHeader{flex-direction:column}.questionFeedbackAdminGrid{grid-template-columns:1fr}}
+@media(max-width:700px){.formativeFeedback{padding:14px;border-radius:14px}.formativeFeedbackActions button{width:100%;margin:3px 0}}
