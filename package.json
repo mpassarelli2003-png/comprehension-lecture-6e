@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "test:block5": "node tests/block5-question-classification.mjs",
+    "prebuild": "npm run test:block5",
     "build": "next build",
     "start": "next start"
   },
