@@ -1,0 +1,150 @@
+.manualPedagogicalAudit {
+  margin-top: 24px;
+}
+
+.manualAuditHeader,
+.manualAuditToolbar,
+.manualAuditStats,
+.manualAuditContextGrid,
+.manualAuditProgress,
+.manualAuditActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.manualAuditHeader {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.manualAuditStats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(110px, 1fr));
+  margin: 18px 0;
+}
+
+.manualAuditStats > div {
+  border: 1px solid #d7dce3;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: #fff;
+}
+
+.manualAuditStats b {
+  font-size: 1.45rem;
+}
+
+.manualAuditStats span,
+.manualAuditProgress span {
+  font-size: .9rem;
+}
+
+.manualAuditToolbar {
+  align-items: flex-end;
+  margin-bottom: 18px;
+}
+
+.manualAuditToolbar label,
+.manualAuditDecision label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.manualAuditToolbar select,
+.manualAuditDecision select,
+.manualAuditDecision input,
+.manualAuditDecision textarea,
+.manualAuditRow select {
+  width: 100%;
+}
+
+.manualAuditExerciseSelect {
+  flex: 1 1 360px;
+}
+
+.manualAuditContextGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+  align-items: stretch;
+}
+
+.automaticAuditSnapshot {
+  border-left: 5px solid #6b7280;
+}
+
+.manualAuditProgress {
+  margin: 14px 0;
+}
+
+.manualAuditProgress span {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  border: 1px solid #d7dce3;
+}
+
+.manualAuditGroup {
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  margin: 18px 0;
+  padding: 14px;
+}
+
+.manualAuditGroup legend {
+  font-weight: 800;
+  padding: 0 8px;
+}
+
+.manualAuditRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 220px);
+  gap: 14px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.manualAuditRow:last-child {
+  border-bottom: 0;
+}
+
+.manualAuditRow label {
+  font-weight: 650;
+}
+
+.manualAuditDecision {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.manualAuditNotes,
+.manualAuditActions,
+.manualAuditDecision > p {
+  grid-column: 1 / -1;
+}
+
+.manualAuditNotes textarea {
+  min-height: 120px;
+}
+
+@media (max-width: 800px) {
+  .manualAuditStats,
+  .manualAuditContextGrid,
+  .manualAuditDecision,
+  .manualAuditRow {
+    grid-template-columns: 1fr;
+  }
+
+  .manualAuditRow {
+    gap: 6px;
+  }
+}
