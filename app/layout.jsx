@@ -3,6 +3,7 @@ import "./formativeFeedback.css";
 import "./progressDashboard.css";
 import "./contentCalibration.css";
 import "./manualPedagogicalAudit.css";
+import "./localExerciseWorkshop.css";
 import ProgressiveAnswerGuard from "./ProgressiveAnswerGuard";
 import FormativeFeedbackPanel from "./FormativeFeedbackPanel";
 import GuidedReadingCoach from "./GuidedReadingCoach";

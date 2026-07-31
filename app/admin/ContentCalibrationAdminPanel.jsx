@@ -1,18 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import baseExercises from "../data/exercises";
-import moreExercises from "../data/moreExercises";
-import genesisExercise from "../data/genesisExercise";
 import {
   CONTENT_LEVEL_PROFILES,
   CONTENT_TEXT_TYPES,
   summarizeContentBank,
   validateContentBank
 } from "../../lib/contentCalibration";
-import { QUESTION_DIMENSIONS, normalizeExerciseQuestions } from "../../lib/questionClassification";
-
-const exercises = [...baseExercises, ...moreExercises, genesisExercise].map(normalizeExerciseQuestions);
+import { QUESTION_DIMENSIONS } from "../../lib/questionClassification";
+import { useExerciseBank } from "../useExerciseBank";
 
 function downloadJson(filename, value) {
   const blob = new Blob([JSON.stringify(value, null, 2)], { type: "application/json" });
@@ -31,9 +27,10 @@ function statusLabel(status) {
 }
 
 export default function ContentCalibrationAdminPanel() {
+  const { exercises, store } = useExerciseBank({ includeDrafts: true });
   const [levelFilter, setLevelFilter] = useState("all");
   const [message, setMessage] = useState("");
-  const summary = useMemo(() => summarizeContentBank(exercises), []);
+  const summary = useMemo(() => summarizeContentBank(exercises), [exercises]);
   const rows = levelFilter === "all"
     ? summary.audits
     : summary.audits.filter((audit) => audit.levelId === levelFilter);
@@ -49,7 +46,7 @@ export default function ContentCalibrationAdminPanel() {
         <div>
           <p className="eyebrow">Bloc 8</p>
           <h2>Banque de textes calibrée</h2>
-          <p>Couverture par niveau, type de texte, longueur et dimensions de lecture.</p>
+          <p>Couverture par niveau, type de texte, longueur et dimensions de lecture. Les brouillons locaux sont inclus dans cet audit administrateur.</p>
         </div>
         <span className={`badge ${summary.errors.length ? "errorBox" : "successBox"}`}>
           {summary.errors.length ? `${summary.errors.length} erreur(s)` : "Aucune erreur bloquante"}
@@ -62,6 +59,7 @@ export default function ContentCalibrationAdminPanel() {
         <div><b>{summary.readyTexts}</b><span>prêts</span></div>
         <div><b>{summary.textsToReview}</b><span>à revoir</span></div>
         <div><b>{summary.blockedTexts}</b><span>bloqués</span></div>
+        <div><b>{store.entries.length}</b><span>locaux</span></div>
       </div>
 
       <div className="contentCalibrationGrid">
