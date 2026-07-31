@@ -39,7 +39,7 @@ equal(Object.keys(MANUAL_AUDIT_STATUSES).length, 4, "quatre statuts manuels");
 equal(Object.keys(MANUAL_CRITERION_VALUES).length, 3, "trois états par critère");
 
 const exercises = [
-  { id: "texte-a", title: "Texte A", level: "6e année", textType: "narratif", category: "texte littéraire", intention: "Lire pour comprendre." },
+  { id: "texte-a", title: "Texte A", level: "6e année", textType: "narratif", category: "texte littéraire", intention: "Lire pour comprendre.", text: "Contenu intégral à ne pas exporter", questions: [{ expectedAnswer: "Réponse privée" }] },
   { id: "texte-b", title: "Texte B", level: "Secondaire 1", textType: "informatif", category: "texte explicatif", intention: "Lire pour expliquer." }
 ];
 
@@ -105,8 +105,10 @@ equal(exported.automaticAuditPreserved, true);
 equal(exported.exercises.length, 2);
 equal(exported.exercises[0].automaticAudit.wordCount, 500);
 equal(exported.exercises[0].manualAudit.status, "ready");
+ok(!Object.hasOwn(exported.exercises[0], "text"), "le texte intégral n’est pas exporté");
+ok(!Object.hasOwn(exported.exercises[0], "questions"), "les questions et réponses attendues ne sont pas exportées");
 const serialized = JSON.stringify(exported);
-ok(!serialized.includes("expectedAnswer"), "aucune réponse attendue dans l’export");
-ok(!serialized.includes('"text":'), "le texte intégral n’est pas exporté");
+ok(!serialized.includes("Réponse privée"), "aucune réponse attendue dans l’export");
+ok(!serialized.includes("Contenu intégral à ne pas exporter"), "aucun texte intégral dans l’export");
 
 console.log(`Bloc 9 — audit manuel : ${checks} assertions réussies.`);
