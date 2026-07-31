@@ -1,0 +1,35 @@
+.progressPage{max-width:1250px}
+.progressHero h1{margin:.2em 0}
+.progressActions{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.progressOverview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.progressMetric{display:flex;flex-direction:column;gap:8px;min-height:120px;justify-content:center}
+.progressMetric span{font-weight:700;color:#4f5968}
+.progressMetric b{font-size:2.4rem}
+.progressStudentSummary{border:2px solid #4d789b;background:#f2f8fc}
+.progressStudentSummary p{line-height:1.5}
+.progressDimensionGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.progressDimension,.progressMode{padding:14px;border:1px solid #abb2bc;border-radius:14px;background:#fff}
+.progressDimensionHeader{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.progressDimensionHeader h3{margin:.1rem 0 .6rem}
+.progressBar{height:14px;border:1px solid #7a828d;border-radius:999px;background:#edf0f3;overflow:hidden}
+.progressBar span{display:block;height:100%;background:#66a573;border-radius:999px;transition:width .2s ease}
+.progressCounts{display:flex;flex-wrap:wrap;gap:12px;margin:.7rem 0 0;color:#3f4855}
+.progressTwoColumns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.progressMode+.progressMode{margin-top:12px}
+.progressNeed{padding:8px 10px;border:1px solid #c4c9d0;border-radius:10px;background:#fafbfc}
+.progressRecentList{display:grid;gap:8px}
+.progressRecentList article{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px;border:1px solid #c5cad1;border-radius:12px}
+.progressRecentList article>div{display:flex;flex-direction:column;gap:5px}
+.progressRecentList article>div span{color:#4f5968}
+.progressBadge-complete{background:#e4f6e7}
+.progressBadge-partial{background:#fff7d6}
+.progressBadge-missing{background:#ffe6e6}
+.adminProgressSummary{border:2px solid #4d789b;background:#f2f8fc}
+.adminProgressGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.adminProgressGrid>div{padding:10px;border:1px solid #a8b6c2;border-radius:10px;background:white}
+.adminProgressGrid p{margin:.25rem 0}
+.adminProgressTable{display:grid;gap:7px;margin-top:10px}
+.adminProgressTable>div{display:grid;grid-template-columns:minmax(130px,1fr) repeat(4,minmax(65px,.45fr));gap:8px;padding:9px;border-bottom:1px solid #c4cbd3;align-items:center}
+.adminProgressTable .adminProgressHeader{font-weight:800;background:#e8f1f7;border-radius:8px;border-bottom:0}
+@media(max-width:900px){.progressOverview{grid-template-columns:repeat(2,minmax(0,1fr))}.progressDimensionGrid,.progressTwoColumns{grid-template-columns:1fr}.adminProgressGrid{grid-template-columns:1fr 1fr}.adminProgressTable>div{grid-template-columns:1fr 1fr}.adminProgressTable .adminProgressHeader{display:none}}
+@media(max-width:600px){.progressOverview,.adminProgressGrid{grid-template-columns:1fr}.progressRecentList article{align-items:flex-start;flex-direction:column}.progressActions>*{width:100%;text-align:center}.progressCounts{flex-direction:column;gap:4px}}
