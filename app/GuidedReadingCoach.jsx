@@ -158,15 +158,50 @@ function targetStep(button) {
   return Number(textOf(button).match(/^(\d+)/)?.[1] || 0);
 }
 
+function rightQuestionColumn() {
+  return Array.from(document.querySelectorAll("main .grid.cols > section.card"))[1];
+}
+
 function synchronizeDisplayedQuestionWord(context) {
   if (!context?.hasQuestion || context.modeId === "simulation" || context.step !== 3) return;
-  const columns = Array.from(document.querySelectorAll("main .grid.cols > section.card"));
-  const rightColumn = columns[1];
+  const rightColumn = rightQuestionColumn();
   const paragraph = Array.from(rightColumn?.querySelectorAll("p.yellow") || []).find((item) => textOf(item).startsWith("Mot-question"));
   if (!paragraph) return;
   const strategy = buildReadingStrategy({ question: context.question, levelId: context.levelId, modeId: context.modeId });
   const expected = `Mot-question : ${strategy.questionWord}. ${strategy.questionWordHelp}`;
   if (textOf(paragraph) !== expected) paragraph.textContent = expected;
+}
+
+function synchronizeLegacySupports(context) {
+  if (!context?.hasQuestion || context.modeId === "simulation" || context.step !== 5) return;
+  const rightColumn = rightQuestionColumn();
+  if (!rightColumn) return;
+  const strategy = buildReadingStrategy({ question: context.question, levelId: context.levelId, modeId: context.modeId });
+
+  const targetCard = Array.from(rightColumn.querySelectorAll(".card")).find((card) => textOf(card.querySelector("b")) === "Ce que la question demande :");
+  const targetParagraph = targetCard?.querySelector("p");
+  const targetText = `${strategy.classification.validationProfile.shortInstruction} La question attend au moins ${strategy.minimumExpectedElements} élément${strategy.minimumExpectedElements > 1 ? "s" : ""}.`;
+  if (targetParagraph && textOf(targetParagraph) !== targetText) targetParagraph.textContent = targetText;
+
+  const hintsCard = Array.from(rightColumn.querySelectorAll(".card")).find((card) => textOf(card.querySelector("h3")) === "Indices gradués");
+  const details = Array.from(hintsCard?.querySelectorAll("details") || []);
+  const safeHints = [
+    ["Indice 1 — Comprendre", `Mot-question : « ${strategy.questionWord} ». ${strategy.questionWordHelp}`],
+    ["Indice 2 — Trouver", strategy.phases.find.short],
+    ["Indice 3 — Répondre", strategy.classification.validationProfile.shortInstruction]
+  ];
+  details.slice(0, safeHints.length).forEach((detail, index) => {
+    const [title, body] = safeHints[index];
+    const summary = detail.querySelector("summary");
+    const paragraph = detail.querySelector("p");
+    if (summary && textOf(summary) !== title) summary.textContent = title;
+    if (paragraph && textOf(paragraph) !== body) paragraph.textContent = body;
+  });
+}
+
+function synchronizeQuestionSupports(context) {
+  synchronizeDisplayedQuestionWord(context);
+  synchronizeLegacySupports(context);
 }
 
 export default function GuidedReadingCoach({ children }) {
@@ -194,7 +229,7 @@ export default function GuidedReadingCoach({ children }) {
       window.clearTimeout(timer);
       timer = window.setTimeout(() => {
         const next = parseQuestionContext();
-        synchronizeDisplayedQuestionWord(next);
+        synchronizeQuestionSupports(next);
         const signature = JSON.stringify(next);
         if (signature !== signatureRef.current) {
           signatureRef.current = signature;
@@ -269,8 +304,7 @@ export default function GuidedReadingCoach({ children }) {
   }
 
   function focusAnswer() {
-    const columns = Array.from(document.querySelectorAll("main .grid.cols > section.card"));
-    columns[1]?.querySelector("textarea")?.focus();
+    rightQuestionColumn()?.querySelector("textarea")?.focus();
   }
 
   function blockForMissingEvidence(event, message) {
@@ -320,7 +354,7 @@ export default function GuidedReadingCoach({ children }) {
     if (!enabled) return;
     window.setTimeout(() => {
       const next = parseQuestionContext();
-      synchronizeDisplayedQuestionWord(next);
+      synchronizeQuestionSupports(next);
       if (next) setContext(next);
     }, 0);
   }
