@@ -65,21 +65,31 @@ function parseContext() {
   const rightColumn = columns[1];
   const exerciseTitle = textOf(leftColumn?.querySelector("h1"));
   const exercise = exercises.find((item) => item.title === exerciseTitle);
+  const work = loadStudentWork();
   const questionCard = Array.from(rightColumn?.querySelectorAll(".card") || [])
     .find((element) => /Question\s+\d+\s*\/\s*\d+/i.test(textOf(element)));
 
   if (!exercise || !questionCard) {
-    return { step, levelId, modeId, hasQuestion: false, exerciseTitle };
+    return {
+      step,
+      levelId,
+      modeId,
+      hasQuestion: false,
+      exercise,
+      exerciseTitle,
+      work
+    };
   }
 
   const numberText = textOf(questionCard.querySelector("b"));
   const match = numberText.match(/Question\s+(\d+)\s*\/\s*(\d+)/i);
   const questionIndex = Math.max(0, Number(match?.[1] || 1) - 1);
   const question = exercise.questions[questionIndex];
-  if (!question) return { step, levelId, modeId, hasQuestion: false, exerciseTitle };
+  if (!question) {
+    return { step, levelId, modeId, hasQuestion: false, exercise, exerciseTitle, work };
+  }
 
   const textarea = rightColumn?.querySelector("textarea");
-  const work = loadStudentWork();
   const answer = textarea?.value ?? work?.answers?.[question.id] ?? "";
   const key = [exercise.id, question.id, levelId, modeId].join("|");
 
@@ -131,6 +141,7 @@ export default function FormativeFeedbackPanel({ children }) {
   const [notice, setNotice] = useState("");
   const [submission, setSubmission] = useState(null);
   const signatureRef = useRef("");
+  const currentKeyRef = useRef("");
 
   function refresh(delay = 0) {
     if (!enabled || typeof window === "undefined") return;
@@ -144,8 +155,9 @@ export default function FormativeFeedbackPanel({ children }) {
         savedAt: next?.work?.savedAt
       });
       if (signature !== signatureRef.current) {
-        const questionChanged = next?.key && next.key !== context?.key;
+        const questionChanged = Boolean(next?.key) && next.key !== currentKeyRef.current;
         signatureRef.current = signature;
+        currentKeyRef.current = next?.key || "";
         setContext(next);
         if (questionChanged) {
           setAttempted(false);
