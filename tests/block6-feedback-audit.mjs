@@ -9,6 +9,10 @@ import {
 } from "../lib/formativeFeedback.js";
 import { normalizeExerciseQuestions } from "../lib/questionClassification.js";
 
+function escapeRegExp(value = "") {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 const exercises = [...baseExercises, ...moreExercises, genesisExercise].map(normalizeExerciseQuestions);
 const coverage = summarizeFeedbackCoverage(exercises);
 const validation = validateFeedbackCoverage(exercises);
@@ -55,7 +59,9 @@ for (const exercise of exercises) {
     });
     assert.equal(simulation.procedureOnly, true, `${exercise.id}/${question.id} : simulation non procédurale.`);
     assert.doesNotMatch(simulationText, /RÉPONSE ATTENDUE CONFIDENTIELLE/);
-    assert.doesNotMatch(simulationText, new RegExp(String(question.expectedAnswer || "a^"), "i"), `${exercise.id}/${question.id} : fuite de réponse attendue.`);
+    if (question.expectedAnswer) {
+      assert.doesNotMatch(simulationText, new RegExp(escapeRegExp(question.expectedAnswer), "i"), `${exercise.id}/${question.id} : fuite de réponse attendue.`);
+    }
 
     const oldEvidence = evaluateReadingAnswer(
       question,
