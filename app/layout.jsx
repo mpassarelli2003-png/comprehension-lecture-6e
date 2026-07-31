@@ -19,11 +19,11 @@ export default function RootLayout({ children }) {
           <a className="voiceHelpButton" href="/aide-vocale">Aide vocale IA</a>
           <a className="adminButton" href="/admin/login">Admin</a>
         </nav>
-        <ProgressiveAnswerGuard>
-          <FormativeFeedbackPanel>
+        <FormativeFeedbackPanel>
+          <ProgressiveAnswerGuard>
             <GuidedReadingCoach>{children}</GuidedReadingCoach>
-          </FormativeFeedbackPanel>
-        </ProgressiveAnswerGuard>
+          </ProgressiveAnswerGuard>
+        </FormativeFeedbackPanel>
       </body>
     </html>
   );
