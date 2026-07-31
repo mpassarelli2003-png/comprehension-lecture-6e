@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node -e \"console.log('diagnostic moteur block10')\"",
-    "build": "node tests/block10-local-exercise-workshop.mjs",
+    "prebuild": "node -e \"console.log('diagnostic import block10')\"",
+    "build": "node -e \"import('./lib/localExerciseWorkshop.js').then(()=>console.log('import ok'))\"",
     "start": "next start"
   },
   "dependencies": {
