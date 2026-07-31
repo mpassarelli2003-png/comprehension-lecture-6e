@@ -12,6 +12,11 @@
 .formativeFeedbackGrid p{margin:.45rem 0;line-height:1.45}
 .formativeNextStep{border-width:2px!important;border-color:#2d6cdf!important;background:#f2f7ff!important}
 .formativeFeedbackActions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;margin-top:12px}
+.formativeChecklist{margin-top:12px;padding:12px 14px;border:1px solid #8993a0;border-radius:12px;background:white}
+.formativeChecklistGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:10px}
+.formativeChecklistGrid>div{padding:10px;border:1px solid #c2c7cf;border-radius:10px;background:#fafbfc}
+.formativeChecklistGrid h3{margin:.1rem 0 .5rem;font-size:1rem}
+.formativeChecklistGrid p{margin:.35rem 0;line-height:1.4}
 .formativeSubmission{border-color:#a33a2b;background:#fff0ed}
 .formativeSubmission h2{margin:.15rem 0 .55rem}
 .questionFeedbackAdmin{border:2px solid #6b5a94;background:#f7f3ff}
@@ -20,5 +25,5 @@
 .feedbackPreviewList{display:grid;gap:8px;margin-top:10px}
 .feedbackPreviewList>div{padding:10px;border:1px solid #b6abc9;border-radius:10px;background:white}
 .feedbackPreviewList p{margin:.25rem 0;line-height:1.4}
-@media(max-width:1000px){.formativeFeedback{margin:10px 12px}.formativeFeedbackGrid{grid-template-columns:1fr}.formativeFeedbackHeader{flex-direction:column}.questionFeedbackAdminGrid{grid-template-columns:1fr}}
+@media(max-width:1000px){.formativeFeedback{margin:10px 12px}.formativeFeedbackGrid,.formativeChecklistGrid{grid-template-columns:1fr}.formativeFeedbackHeader{flex-direction:column}.questionFeedbackAdminGrid{grid-template-columns:1fr}}
 @media(max-width:700px){.formativeFeedback{padding:14px;border-radius:14px}.formativeFeedbackActions button{width:100%;margin:3px 0}}
