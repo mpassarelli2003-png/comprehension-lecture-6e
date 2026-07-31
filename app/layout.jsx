@@ -1,5 +1,6 @@
 import "./globals.css";
 import ProgressiveAnswerGuard from "./ProgressiveAnswerGuard";
+import FormativeFeedbackPanel from "./FormativeFeedbackPanel";
 import GuidedReadingCoach from "./GuidedReadingCoach";
 
 export const metadata = {
@@ -18,7 +19,9 @@ export default function RootLayout({ children }) {
           <a className="adminButton" href="/admin/login">Admin</a>
         </nav>
         <ProgressiveAnswerGuard>
-          <GuidedReadingCoach>{children}</GuidedReadingCoach>
+          <FormativeFeedbackPanel>
+            <GuidedReadingCoach>{children}</GuidedReadingCoach>
+          </FormativeFeedbackPanel>
         </ProgressiveAnswerGuard>
       </body>
     </html>
