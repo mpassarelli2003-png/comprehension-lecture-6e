@@ -19,6 +19,11 @@ import {
   summarizeQuestionBank,
   validateQuestionSchema
 } from "../../lib/questionClassification";
+import {
+  FORMATIVE_MESSAGE_PREVIEW,
+  summarizeFeedbackCoverage,
+  validateFeedbackCoverage
+} from "../../lib/formativeFeedback";
 
 const rawExercises = [...baseExercises, ...moreExercises, genesisExercise];
 const exercises = rawExercises.map(normalizeExerciseQuestions);
@@ -39,10 +44,15 @@ function validateExercise(value) {
     return { valid: false, message: `Questions invalides — ${details}.`, exercise: normalized };
   }
 
+  const feedbackValidation = validateFeedbackCoverage([normalized]);
+  if (!feedbackValidation.valid) {
+    return { valid: false, message: feedbackValidation.message, exercise: normalized };
+  }
+
   const dimensions = new Set(normalized.questions.map((question) => question.dimension)).size;
   return {
     valid: true,
-    message: `Exercice valide : ${normalized.questions.length} question(s), ${dimensions} dimension(s), classification structurée appliquée.`,
+    message: `Exercice valide : ${normalized.questions.length} question(s), ${dimensions} dimension(s), classification et rétroaction formative appliquées.`,
     exercise: normalized
   };
 }
@@ -57,6 +67,7 @@ export default function AdminWorkspace() {
   const [json, setJson] = useState(JSON.stringify(exercises[0] || {}, null, 2));
   const [settingsMessage, setSettingsMessage] = useState("");
   const [jsonMessage, setJsonMessage] = useState("");
+  const [feedbackMessage, setFeedbackMessage] = useState("");
 
   useEffect(() => {
     try {
@@ -69,6 +80,7 @@ export default function AdminWorkspace() {
     LEVELS.map((level) => [level.id, exercises.filter((exercise) => normalizeExerciseLevel(exercise.level) === level.id).length])
   ), []);
   const bankSummary = useMemo(() => summarizeQuestionBank(exercises), []);
+  const feedbackSummary = useMemo(() => summarizeFeedbackCoverage(exercises), []);
 
   function toggleSetting(kind, id) {
     const key = kind === "level" ? "enabledLevels" : "enabledModes";
@@ -114,6 +126,13 @@ export default function AdminWorkspace() {
     } catch (error) {
       setJsonMessage(`JSON invalide : ${error.message}`);
     }
+  }
+
+  function validateFeedback() {
+    const result = validateFeedbackCoverage(exercises);
+    setFeedbackMessage(result.valid
+      ? `Validation réussie — ${result.message}`
+      : `Validation à corriger — ${result.message}`);
   }
 
   function downloadJson() {
@@ -187,6 +206,33 @@ export default function AdminWorkspace() {
           <p><b>Preuve obligatoire :</b> {bankSummary.proofRequired}</p>
           <p><b>Justification obligatoire :</b> {bankSummary.justificationRequired}</p>
           <p className="yellow">Les questions existantes sont classées automatiquement sans exposer les réponses attendues aux élèves.</p>
+        </div>
+
+        <div className="card questionFeedbackAdmin">
+          <h2>Rétroaction formative</h2>
+          <div className="questionFeedbackAdminGrid">
+            <p><b>Questions évaluables :</b> {feedbackSummary.evaluable} / {feedbackSummary.total}</p>
+            <p><b>Preuve obligatoire :</b> {feedbackSummary.proofRequired}</p>
+            <p><b>Justification obligatoire :</b> {feedbackSummary.justificationRequired}</p>
+            <p><b>Règles à clarifier :</b> {feedbackSummary.unclear.length}</p>
+          </div>
+          <h3>Couverture par dimension</h3>
+          {Object.entries(QUESTION_DIMENSIONS).map(([id, value]) => (
+            <p key={id}><b>{value.label} :</b> {feedbackSummary.byDimension[id]} question(s) avec rétroaction</p>
+          ))}
+          <button className="violet" onClick={validateFeedback}>Valider la rétroaction</button>
+          {feedbackMessage && <p className="statusBox" role="status">{feedbackMessage}</p>}
+          <h3>Aperçu des messages</h3>
+          <div className="feedbackPreviewList">
+            {Object.entries(FORMATIVE_MESSAGE_PREVIEW).map(([dimension, messages]) => (
+              <div key={dimension}>
+                <b>{QUESTION_DIMENSIONS[dimension]?.label || dimension}</b>
+                <p>À compléter : {messages.partial}</p>
+                <p>Acceptable : {messages.acceptable}</p>
+              </div>
+            ))}
+          </div>
+          <p className="yellow">Les messages évaluent la structure de la réponse. Ils ne comparent jamais la réponse de l’élève à la réponse attendue.</p>
         </div>
       </section>
 
