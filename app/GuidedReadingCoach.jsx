@@ -2,12 +2,16 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import baseExercises from "./data/exercises";
+import moreExercises from "./data/moreExercises";
+import genesisExercise from "./data/genesisExercise";
 import {
   READING_STRATEGY_STORAGE_KEY,
   buildReadingStrategy,
+  countEvidenceInStudentWork,
   detectStrategyLevel,
   detectStrategyMode,
-  countEvidenceForExercise,
+  hasEvidenceForQuestion,
   makeStrategyKey,
   missingEvidenceCount,
   phaseForStep,
@@ -15,6 +19,16 @@ import {
 } from "../lib/readingStrategies";
 
 const PHASE_ORDER = ["understand", "find", "respond"];
+const exercises = [...baseExercises, ...moreExercises, genesisExercise];
+const STUDENT_WORK_KEYS = [
+  "lecture_student_work_v9",
+  "lecture6e_student_work_v8",
+  "lecture6e_student_work_v7",
+  "lecture6e_student_work_v6",
+  "lecture6e_student_work_v5",
+  "lecture6e_student_work_v4",
+  "lecture6e_student_work_v3"
+];
 
 function textOf(element) {
   return String(element?.textContent || "").replace(/\s+/g, " ").trim();
@@ -36,6 +50,24 @@ function loadRecords() {
   }
 }
 
+function loadStudentWork() {
+  if (typeof window === "undefined") return null;
+  for (const key of STUDENT_WORK_KEYS) {
+    try {
+      const value = localStorage.getItem(key);
+      if (value) return JSON.parse(value);
+    } catch {}
+  }
+  return null;
+}
+
+function studentWorkIsEmpty(work) {
+  if (!work || typeof work !== "object") return true;
+  const hasProof = Array.isArray(work.proofs) && work.proofs.some((proof) => String(proof?.text || "").trim());
+  const hasAnswer = Object.values(work.answers || {}).some((answer) => String(answer || "").trim());
+  return !hasProof && !hasAnswer;
+}
+
 function parseQuestionContext() {
   if (typeof document === "undefined") return null;
   const activeStep = document.querySelector(".stepNavigation button.blue");
@@ -46,20 +78,33 @@ function parseQuestionContext() {
   const modeId = detectStrategyMode(badges.join(" "));
   const columns = Array.from(document.querySelectorAll("main .grid.cols > section.card"));
   const rightColumn = columns[1];
+  const exerciseTitle = textOf(columns[0]?.querySelector("h1")) || "Lecture";
+  const exerciseData = exercises.find((item) => item.title === exerciseTitle);
+  const studentWork = loadStudentWork();
+  const exerciseId = exerciseData?.id || studentWork?.exerciseId || "";
   const questionCard = Array.from(rightColumn?.querySelectorAll(".card") || []).find((element) => /Question\s+\d+\s*\/\s*\d+/i.test(textOf(element)));
-  if (!questionCard) return { step, levelId, modeId, hasQuestion: false };
+
+  if (!questionCard) {
+    return { step, levelId, modeId, hasQuestion: false, exerciseTitle, exerciseId };
+  }
 
   const numberText = textOf(questionCard.querySelector("b")) || "Question";
   const countMatch = numberText.match(/Question\s+(\d+)\s*\/\s*(\d+)/i);
+  const questionIndex = Number(countMatch?.[1] || 1);
   const prompt = textOf(questionCard.querySelector("h2"));
+  const questionData = exerciseData?.questions?.[questionIndex - 1]
+    || exerciseData?.questions?.find((item) => textOf({ textContent: item.prompt }) === prompt);
   const meta = Array.from(questionCard.querySelectorAll("p")).map(textOf).find((value) => /point\(s\)|point/i.test(value)) || "comprendre — 1 point";
   const metaParts = meta.split(/\s+—\s+/);
-  const type = metaParts[0] || "comprendre";
+  const type = questionData?.type || metaParts[0] || "comprendre";
   const pointsMatch = meta.match(/(\d+)\s*point/i);
-  const points = Number(pointsMatch?.[1] || 1);
-  const exerciseTitle = textOf(columns[0]?.querySelector("h1")) || "Lecture";
+  const points = Number(questionData?.points || pointsMatch?.[1] || 1);
+  const questionId = questionData?.id || "";
+  const proofTypeSuggested = questionData?.proofTypeSuggested || "";
   const proofSectionVisible = textOf(rightColumn).includes("Mes passages sauvegardés");
-  const proofCount = Array.from(rightColumn?.querySelectorAll("button") || []).filter((button) => textOf(button).includes("Utiliser dans ma réponse")).length;
+  const domProofCount = Array.from(rightColumn?.querySelectorAll("button") || []).filter((button) => textOf(button).includes("Utiliser dans ma réponse")).length;
+  const savedEvidence = hasEvidenceForQuestion(studentWork, { exerciseId, modeId, questionId });
+  const proofCount = Math.max(domProofCount, savedEvidence ? 1 : 0);
   const key = makeStrategyKey({ exerciseTitle, questionNumber: numberText, prompt, levelId, modeId });
 
   return {
@@ -69,12 +114,15 @@ function parseQuestionContext() {
     levelId,
     modeId,
     exerciseTitle,
+    exerciseId,
+    questionId,
     questionNumber: numberText,
-    questionIndex: Number(countMatch?.[1] || 1),
+    questionIndex,
     totalQuestions: Number(countMatch?.[2] || 1),
     prompt,
     type,
     points,
+    proofTypeSuggested,
     proofCount,
     proofSectionVisible
   };
@@ -89,6 +137,24 @@ function readSubmissionSummary(button) {
 function targetStep(button) {
   if (!button.closest(".stepNavigation")) return 0;
   return Number(textOf(button).match(/^(\d+)/)?.[1] || 0);
+}
+
+function synchronizeDisplayedQuestionWord(context) {
+  if (!context?.hasQuestion || context.modeId === "simulation" || context.step !== 3) return;
+  const columns = Array.from(document.querySelectorAll("main .grid.cols > section.card"));
+  const rightColumn = columns[1];
+  const paragraph = Array.from(rightColumn?.querySelectorAll("p.yellow") || []).find((item) => textOf(item).startsWith("Mot-question"));
+  if (!paragraph) return;
+  const strategy = buildReadingStrategy({
+    prompt: context.prompt,
+    type: context.type,
+    proofTypeSuggested: context.proofTypeSuggested,
+    points: context.points,
+    levelId: context.levelId,
+    modeId: context.modeId
+  });
+  const expected = `Mot-question : ${strategy.questionWord}. ${strategy.questionWordHelp}`;
+  if (textOf(paragraph) !== expected) paragraph.textContent = expected;
 }
 
 export default function GuidedReadingCoach({ children }) {
@@ -116,12 +182,19 @@ export default function GuidedReadingCoach({ children }) {
       window.clearTimeout(timer);
       timer = window.setTimeout(() => {
         const next = parseQuestionContext();
+        synchronizeDisplayedQuestionWord(next);
         const signature = JSON.stringify(next);
         if (signature !== signatureRef.current) {
           signatureRef.current = signature;
           setContext(next);
           setExpanded(false);
           setNotice("");
+        }
+        if (!next?.hasQuestion && next?.step === 1) {
+          window.setTimeout(() => {
+            const work = loadStudentWork();
+            if (studentWorkIsEmpty(work)) setRecords({});
+          }, 120);
         }
       }, 30);
     };
@@ -138,7 +211,7 @@ export default function GuidedReadingCoach({ children }) {
   }, [enabled]);
 
   useEffect(() => {
-    if (!context?.hasQuestion || !context.proofSectionVisible) return;
+    if (!context?.hasQuestion) return;
     setRecords((current) => {
       const previous = current[context.key] || {};
       const evidenceSaved = context.proofCount > 0;
@@ -152,7 +225,7 @@ export default function GuidedReadingCoach({ children }) {
         }
       };
     });
-  }, [context?.key, context?.proofCount, context?.proofSectionVisible, context?.hasQuestion]);
+  }, [context?.key, context?.proofCount, context?.hasQuestion]);
 
   const record = context?.key ? records[context.key] || {} : {};
   const strategy = useMemo(() => {
@@ -160,13 +233,14 @@ export default function GuidedReadingCoach({ children }) {
     return buildReadingStrategy({
       prompt: context.prompt,
       type: context.type,
+      proofTypeSuggested: context.proofTypeSuggested,
       points: context.points,
       levelId: context.levelId,
       modeId: context.modeId
     });
   }, [context]);
   const activePhase = phaseForStep(context?.step || 3);
-  const evidenceSaved = Boolean(record.evidenceSaved || context?.proofCount > 0);
+  const evidenceSaved = Boolean(context?.proofCount > 0);
 
   function updateRecord(updater) {
     if (!context?.key) return;
@@ -209,10 +283,9 @@ export default function GuidedReadingCoach({ children }) {
     if (label.includes("Remettre la simulation")) {
       const summary = readSubmissionSummary(button);
       if (!summary) return;
-      const title = textOf(document.querySelector("main .grid.cols > section.card h1")) || context?.exerciseTitle || "Lecture";
-      const withEvidence = countEvidenceForExercise(records, {
-        exerciseTitle: title,
-        levelId: context?.levelId || "6e",
+      const studentWork = loadStudentWork();
+      const withEvidence = countEvidenceInStudentWork(studentWork, {
+        exerciseId: context?.exerciseId || studentWork?.exerciseId || "",
         modeId: context?.modeId || "simulation"
       });
       const missing = missingEvidenceCount(summary.total, withEvidence);
@@ -239,6 +312,7 @@ export default function GuidedReadingCoach({ children }) {
     if (!enabled) return;
     window.setTimeout(() => {
       const next = parseQuestionContext();
+      synchronizeDisplayedQuestionWord(next);
       if (next) setContext(next);
     }, 0);
   }
