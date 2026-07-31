@@ -1,27 +1,15 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-
-async function importSource(relativePath) {
-  const source = await readFile(new URL(relativePath, import.meta.url), "utf8");
-  return import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
-}
-
-const classificationModule = await importSource("../lib/questionClassification.js");
-const baseModule = await importSource("../app/data/exercises.js");
-const moreModule = await importSource("../app/data/moreExercises.js");
-const genesisModule = await importSource("../app/data/genesisExercise.js");
-
-const {
+import baseExercises from "../app/data/exercises.js";
+import moreExercises from "../app/data/moreExercises.js";
+import genesisExercise from "../app/data/genesisExercise.js";
+import {
   buildQuestionBank,
   normalizeExerciseQuestions,
   summarizeQuestionBank,
   validateQuestionSchema
-} = classificationModule;
+} from "../lib/questionClassification.js";
 
-const baseExercises = baseModule.default || baseModule.exercises || [];
-const moreExercises = moreModule.default || moreModule.moreExercises || [];
-const genesisExercise = genesisModule.default || genesisModule.genesisExercise;
-const exercises = [...baseExercises, ...moreExercises, ...(genesisExercise ? [genesisExercise] : [])].map(normalizeExerciseQuestions);
+const exercises = [...baseExercises, ...moreExercises, genesisExercise].map(normalizeExerciseQuestions);
 const bank = buildQuestionBank(exercises);
 const summary = summarizeQuestionBank(exercises);
 
@@ -35,14 +23,17 @@ function equal(actual, expected, message) {
   assert.equal(actual, expected, message);
 }
 
-ok(exercises.length >= 10, "au moins dix textes intégrés");
-ok(bank.length >= 70, "banque suffisamment fournie");
+ok(exercises.length >= 14, "au moins quatorze textes intégrés");
+ok(bank.length >= 100, "banque suffisamment fournie");
 equal(summary.total, bank.length, "total cohérent");
-equal(summary.byLevel["6e"], bank.length, "niveau 6e correctement normalisé");
+ok(summary.byLevel["6e"] > 0, "questions de 6e présentes");
+ok(summary.byLevel.sec1 >= 16, "questions de secondaire 1 présentes");
+ok(summary.byLevel.sec2 >= 18, "questions de secondaire 2 présentes");
 
 const allowedWords = new Set(["qui", "quoi", "où", "quand", "combien", "comment", "pourquoi", "quel"]);
 const allowedDimensions = new Set(["comprendre", "inferer", "interpreter", "reagir", "apprecier"]);
 const allowedTypes = new Set(["explicite", "implicite", "opinion_justifiee", "jugement_critique"]);
+const allowedLevels = new Set(["6e", "sec1", "sec2"]);
 
 for (const question of bank) {
   const validation = validateQuestionSchema(question);
@@ -51,8 +42,8 @@ for (const question of bank) {
   ok(allowedWords.has(question.questionWord), `${question.exerciseTitle} — mot-question permis`);
   ok(allowedDimensions.has(question.dimension), `${question.exerciseTitle} — dimension permise`);
   ok(allowedTypes.has(question.questionType), `${question.exerciseTitle} — type permis`);
+  ok(allowedLevels.has(question.targetLevel), `${question.exerciseTitle} — niveau cible permis`);
   ok(Number.isInteger(question.minimumExpectedElements) && question.minimumExpectedElements >= 1 && question.minimumExpectedElements <= 8, `${question.exerciseTitle} — minimum valide`);
-  equal(question.targetLevel, "6e", `${question.exerciseTitle} — niveau cible`);
   ok(Array.isArray(question.validationProfile?.checklist) && question.validationProfile.checklist.length >= 2, `${question.exerciseTitle} — grille de validation`);
   ok(!JSON.stringify(question.validationProfile).includes(String(question.expectedAnswer || "__aucune__")), `${question.exerciseTitle} — aucune réponse finale dans la grille`);
 
@@ -71,7 +62,7 @@ ok(summary.byDimension.comprendre > 0, "questions de compréhension présentes")
 ok(summary.byDimension.interpreter + summary.byDimension.inferer > 0, "questions implicites présentes");
 ok(summary.byDimension.reagir > 0, "questions de réaction présentes");
 ok(summary.byDimension.apprecier > 0, "questions d’appréciation présentes");
-equal(summary.proofRequired, bank.length, "la banque actuelle exige un appui du texte pour chaque question");
+equal(summary.proofRequired, bank.length, "la banque exige un appui du texte pour chaque question");
 ok(summary.justificationRequired > 0 && summary.justificationRequired < bank.length, "justification appliquée de façon sélective");
 
-console.log(`Bloc 5 — banque complète : ${checks} assertions réussies sur ${bank.length} questions.`);
+console.log(`Bloc 5 — banque complète : ${checks} assertions réussies sur ${bank.length} questions et trois niveaux.`);
