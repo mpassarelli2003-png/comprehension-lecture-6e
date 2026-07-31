@@ -11,7 +11,8 @@
     "test:block9": "node tests/block9-manual-pedagogical-audit.mjs && node tests/block9-integration-audit.mjs && node tests/block9-real-bank-coverage.mjs && node tests/block9-real-manual-audit-flow.mjs",
     "test:block10": "node tests/block10-local-exercise-workshop.mjs && node tests/block10-integration-audit.mjs",
     "test:block11": "node tests/block11-publication-readiness.mjs && node tests/block11-integration-audit.mjs",
-    "prebuild": "npm run test:block5 && npm run test:block6 && npm run test:block7 && npm run test:block8 && npm run test:block9 && npm run test:block10 && npm run test:block11",
+    "test:block11b": "node tests/block11b-real-publication-flow.mjs",
+    "prebuild": "npm run test:block5 && npm run test:block6 && npm run test:block7 && npm run test:block8 && npm run test:block9 && npm run test:block10 && npm run test:block11 && npm run test:block11b",
     "build": "next build",
     "start": "next start"
   },
