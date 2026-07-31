@@ -3,11 +3,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { auditExerciseContent } from "../../lib/contentCalibration";
 import {
+  MANUAL_PEDAGOGICAL_AUDIT_KEY,
+  normalizeManualAuditStore
+} from "../../lib/manualPedagogicalAudit";
+import {
   QUESTION_DIMENSIONS,
   QUESTION_TYPES,
   normalizeExerciseQuestions,
   normalizeQuestionLevel
 } from "../../lib/questionClassification";
+import {
+  PUBLICATION_REVIEW_CONFIRMATION,
+  buildPublicationReadiness
+} from "../../lib/publicationReadiness";
 import {
   LOCAL_EXERCISE_STATUSES,
   buildLocalExerciseExport,
@@ -22,6 +30,8 @@ import {
   validateWorkshopExercise
 } from "../../lib/localExerciseWorkshop";
 import { saveLocalExerciseStore, useExerciseBank } from "../useExerciseBank";
+
+const MANUAL_AUDIT_CHANGE_EVENT = "lecture-manual-pedagogical-audit-changed";
 
 function downloadJson(filename, value) {
   const blob = new Blob([JSON.stringify(value, null, 2)], { type: "application/json" });
@@ -51,6 +61,22 @@ function compactAudit(audit) {
   };
 }
 
+function loadManualAuditStore(exercise) {
+  if (typeof window === "undefined") return normalizeManualAuditStore(null, [exercise]);
+  try {
+    const raw = JSON.parse(localStorage.getItem(MANUAL_PEDAGOGICAL_AUDIT_KEY) || "null");
+    return normalizeManualAuditStore(raw, [exercise]);
+  } catch {
+    return normalizeManualAuditStore(null, [exercise]);
+  }
+}
+
+function checklistSymbol(state) {
+  if (state === "pass") return "✓";
+  if (state === "warning") return "!";
+  return "×";
+}
+
 export default function LocalExerciseWorkshopPanel() {
   const { store, setStore } = useExerciseBank({ includeDrafts: true });
   const localEntries = store.entries || [];
@@ -59,15 +85,29 @@ export default function LocalExerciseWorkshopPanel() {
   const [message, setMessage] = useState("Atelier local prêt.");
   const [previewMode, setPreviewMode] = useState("training");
   const [importText, setImportText] = useState("");
+  const [manualAuditStore, setManualAuditStore] = useState(() => normalizeManualAuditStore(null, []));
+  const [finalPreviewOpen, setFinalPreviewOpen] = useState(false);
+  const [finalPreviewReviewed, setFinalPreviewReviewed] = useState(false);
+  const [reviewerConfirmed, setReviewerConfirmed] = useState(false);
   const fileInputRef = useRef(null);
 
   const selectedEntry = localEntries.find((entry) => entry.exercise.id === selectedId) || null;
   const normalizedDraft = useMemo(() => sanitizeWorkshopExercise(draft), [draft]);
   const validation = useMemo(
-    () => validateWorkshopExercise(normalizedDraft, localEntries.map((entry) => entry.exercise.id)),
-    [normalizedDraft, localEntries]
+    () => validateWorkshopExercise(draft, localEntries.map((entry) => entry.exercise.id)),
+    [draft, localEntries]
   );
   const automaticAudit = validation.automaticAudit || auditExerciseContent(normalizedDraft);
+  const manualAuditEntry = manualAuditStore.audits?.[normalizedDraft.id] || null;
+  const readiness = useMemo(
+    () => buildPublicationReadiness(draft, manualAuditEntry, { finalPreviewReviewed, reviewerConfirmed }),
+    [draft, manualAuditEntry, finalPreviewReviewed, reviewerConfirmed]
+  );
+
+  const readinessFingerprint = useMemo(() => JSON.stringify({
+    exercise: draft,
+    manualAudit: manualAuditEntry
+  }), [draft, manualAuditEntry]);
 
   useEffect(() => {
     if (!selectedId && localEntries[0]) {
@@ -75,6 +115,35 @@ export default function LocalExerciseWorkshopPanel() {
       setDraft(localEntries[0].exercise);
     }
   }, [localEntries.length]);
+
+  useEffect(() => {
+    setManualAuditStore(loadManualAuditStore(normalizedDraft));
+
+    function reloadManualAudit(event) {
+      if (event?.detail?.store) {
+        setManualAuditStore(normalizeManualAuditStore(event.detail.store, [normalizedDraft]));
+      } else {
+        setManualAuditStore(loadManualAuditStore(normalizedDraft));
+      }
+    }
+
+    function handleStorage(event) {
+      if (!event || event.key === MANUAL_PEDAGOGICAL_AUDIT_KEY) reloadManualAudit();
+    }
+
+    window.addEventListener(MANUAL_AUDIT_CHANGE_EVENT, reloadManualAudit);
+    window.addEventListener("storage", handleStorage);
+    return () => {
+      window.removeEventListener(MANUAL_AUDIT_CHANGE_EVENT, reloadManualAudit);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, [normalizedDraft.id]);
+
+  useEffect(() => {
+    setFinalPreviewOpen(false);
+    setFinalPreviewReviewed(false);
+    setReviewerConfirmed(false);
+  }, [readinessFingerprint]);
 
   function persist(nextStore, confirmation) {
     saveLocalExerciseStore(nextStore);
@@ -176,17 +245,28 @@ export default function LocalExerciseWorkshopPanel() {
 
   function save(status = selectedEntry?.status || "draft") {
     const result = validateWorkshopExercise(draft, localEntries.map((entry) => entry.exercise.id));
-    if (status === "published" && !result.valid) {
-      setMessage(`Publication bloquée — ${result.errors.join(" · ")}`);
-      return;
+    if (status === "published") {
+      if (!readiness.canPublish) {
+        setMessage(`Publication bloquée — ${readiness.blockers.join(" · ")}`);
+        return;
+      }
+      if (!result.valid) {
+        setMessage(`Publication bloquée — ${result.errors.join(" · ")}`);
+        return;
+      }
+      if (readiness.warnings.length > 0 && !window.confirm(`Publier malgré ${readiness.warnings.length} avertissement(s) pédagogique(s)?`)) {
+        setMessage("Publication annulée pour permettre une nouvelle révision.");
+        return;
+      }
     }
+
     let nextStore = store;
     if (selectedId && selectedId !== result.exercise.id) nextStore = removeLocalExercise(nextStore, selectedId);
     nextStore = upsertLocalExercise(nextStore, result.exercise, status);
     setSelectedId(result.exercise.id);
     setDraft(result.exercise);
     persist(nextStore, status === "published"
-      ? "Exercice publié localement dans le parcours élève."
+      ? `Exercice publié localement. ${PUBLICATION_REVIEW_CONFIRMATION}`
       : "Brouillon enregistré localement.");
   }
 
@@ -212,10 +292,8 @@ export default function LocalExerciseWorkshopPanel() {
   }
 
   function exportCurrent() {
-    const temporaryStore = upsertLocalExercise(store, draft, selectedEntry?.status || "draft");
     downloadJson(`${normalizedDraft.id}.json`, normalizedDraft);
     setMessage("Exercice courant exporté en JSON.");
-    return temporaryStore;
   }
 
   function exportBank() {
@@ -226,8 +304,8 @@ export default function LocalExerciseWorkshopPanel() {
     setMessage("Banque locale complète exportée.");
   }
 
-  function importJson(text) {
-    const parsed = parseExerciseImport(text);
+  function importJson(value) {
+    const parsed = parseExerciseImport(value);
     if (!parsed.valid) {
       setMessage(parsed.errors.join(" · "));
       return;
@@ -255,8 +333,8 @@ export default function LocalExerciseWorkshopPanel() {
     <section className="card localExerciseWorkshop" aria-label="Création et édition locale d’exercices">
       <div className="localWorkshopHeader">
         <div>
-          <p className="eyebrow">Bloc 10</p>
-          <h2>Création, importation et édition locale d’exercices</h2>
+          <p className="eyebrow">Blocs 10 et 11</p>
+          <h2>Création, importation, édition et publication locale d’exercices</h2>
           <p>Les brouillons et publications restent dans ce navigateur. Aucun serveur ni base de données n’est utilisé.</p>
         </div>
         <span className="badge">{localEntries.length} exercice(s) local(aux)</span>
@@ -328,7 +406,8 @@ export default function LocalExerciseWorkshopPanel() {
                 <label>Formulation<textarea value={question.prompt || ""} onChange={(event) => updateQuestion(index, "prompt", event.target.value)} /></label>
                 <div className="localWorkshopFields threeColumns">
                   <label>Dimension
-                    <select value={question.dimension || "comprendre"} onChange={(event) => updateQuestion(index, "dimension", event.target.value)}>
+                    <select value={question.dimension || ""} onChange={(event) => updateQuestion(index, "dimension", event.target.value)}>
+                      <option value="">Choisir une dimension</option>
                       {Object.entries(QUESTION_DIMENSIONS).map(([id, definition]) => <option value={id} key={id}>{definition.label}</option>)}
                     </select>
                   </label>
@@ -379,7 +458,7 @@ export default function LocalExerciseWorkshopPanel() {
           </section>
 
           <section className="card">
-            <h3>Aperçu élève</h3>
+            <h3>Aperçu élève rapide</h3>
             <div className="localPreviewTabs">
               <button type="button" className={previewMode === "training" ? "blue" : ""} onClick={() => setPreviewMode("training")}>Entraînement</button>
               <button type="button" className={previewMode === "simulation" ? "violet" : ""} onClick={() => setPreviewMode("simulation")}>Simulation</button>
@@ -394,7 +473,7 @@ export default function LocalExerciseWorkshopPanel() {
                   <b>Question {index + 1}</b>
                   <p>{question.prompt || "Question à rédiger"}</p>
                   {previewMode === "training" ? (
-                    <small>{QUESTION_DIMENSIONS[question.dimension]?.label || "Comprendre"} · {question.validationProfile?.shortInstruction || "Répondre avec un appui du texte."}</small>
+                    <small>{QUESTION_DIMENSIONS[question.dimension]?.label || "Dimension manquante"} · {question.validationProfile?.shortInstruction || "Répondre avec un appui du texte."}</small>
                   ) : (
                     <small>Réponds de façon autonome. Aucune aide de contenu n’est affichée.</small>
                   )}
@@ -405,15 +484,73 @@ export default function LocalExerciseWorkshopPanel() {
 
           <section className="card">
             <h3>Audit pédagogique manuel</h3>
-            <p>Après l’enregistrement, ce texte apparaît automatiquement dans la section <b>Audit pédagogique manuel</b> située plus bas dans `/admin`.</p>
-            <p>La validation humaine reste distincte de l’audit automatique.</p>
+            <p><b>Statut :</b> {readiness.manualAudit.status}</p>
+            <p>{readiness.manualCounts.pass} conformes · {readiness.manualCounts.review} à revoir · {readiness.manualCounts.pending} non évalués</p>
+            <p>La preuve disponible dans le texte est actuellement : <b>{readiness.manualAudit.criteria?.questions?.proofAvailable || "pending"}</b>.</p>
+          </section>
+
+          <section className="card publicationReadinessBox">
+            <h3>Checklist de publication</h3>
+            <p><b>{readiness.canPublish ? "Prêt à publier" : `${readiness.blockers.length} blocage(s)`}</b> · {readiness.warnings.length} avertissement(s)</p>
+            <div className="publicationChecklist">
+              {readiness.checklist.map((item) => (
+                <div className={`publicationChecklistItem ${item.state}`} key={item.id}>
+                  <span aria-hidden="true">{checklistSymbol(item.state)}</span>
+                  <p>{item.label}</p>
+                </div>
+              ))}
+            </div>
+            {readiness.blockers.map((item) => <p className="errorBox" key={item}>{item}</p>)}
+            {readiness.warnings.map((item) => <p className="yellow" key={item}>{item}</p>)}
+          </section>
+
+          <section className="card finalPublicationPreview">
+            <h3>Aperçu final obligatoire</h3>
+            <button type="button" className="violet" onClick={() => setFinalPreviewOpen((current) => !current)}>
+              {finalPreviewOpen ? "Fermer l’aperçu final" : "Ouvrir l’aperçu final complet"}
+            </button>
+            {finalPreviewOpen && (
+              <div className="finalPreviewContent">
+                <p className="eyebrow">{levelLabel(normalizeQuestionLevel(draft.level))} — {draft.textType || "type manquant"}</p>
+                <h3>{draft.title || "Sans titre"}</h3>
+                <p><b>Intention :</b> {draft.intention || "Intention manquante"}</p>
+                <div className="finalPreviewFullText">
+                  {String(draft.text || "Aucun texte saisi.").split("\n").filter(Boolean).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+                </div>
+                <h4>Questions — entraînement</h4>
+                {(draft.questions || []).map((question, index) => (
+                  <div className="localPreviewQuestion" key={`training-${question.id || index}`}>
+                    <b>Question {index + 1} — {QUESTION_DIMENSIONS[question.dimension]?.label || "Dimension manquante"}</b>
+                    <p>{question.prompt || "Question à rédiger"}</p>
+                    <small>{question.validationProfile?.shortInstruction || "Appui du texte requis selon la classification."}</small>
+                  </div>
+                ))}
+                <h4>Questions — simulation</h4>
+                {(draft.questions || []).map((question, index) => (
+                  <div className="localPreviewQuestion" key={`simulation-${question.id || index}`}>
+                    <b>Question {index + 1}</b>
+                    <p>{question.prompt || "Question à rédiger"}</p>
+                    <small>Répondre de façon autonome; aucune aide de contenu.</small>
+                  </div>
+                ))}
+              </div>
+            )}
+            <label className="publicationConfirmation">
+              <input type="checkbox" checked={finalPreviewReviewed} disabled={!finalPreviewOpen} onChange={(event) => setFinalPreviewReviewed(event.target.checked)} />
+              J’ai vérifié l’aperçu final complet.
+            </label>
+            <label className="publicationConfirmation explicitConfirmation">
+              <input type="checkbox" checked={reviewerConfirmed} onChange={(event) => setReviewerConfirmed(event.target.checked)} />
+              {PUBLICATION_REVIEW_CONFIRMATION}
+            </label>
+            <p className="smallText">Toute modification du texte, des questions ou de l’audit manuel annule ces confirmations.</p>
           </section>
 
           <section className="card localPublicationBox">
             <h3>Enregistrement local</h3>
             <p><b>{validation.message}</b></p>
             <button type="button" className="blue" onClick={() => save("draft")}>Enregistrer comme brouillon</button>
-            <button type="button" className="green" disabled={!validation.valid} onClick={() => save("published")}>Publier dans le parcours élève</button>
+            <button type="button" className="green" disabled={!readiness.canPublish || !validation.valid} onClick={() => save("published")}>Publier dans le parcours élève</button>
             {selectedEntry?.status === "published" && <button type="button" onClick={() => save("draft")}>Retirer du parcours élève</button>}
           </section>
         </aside>

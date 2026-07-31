@@ -18,7 +18,7 @@ let checks = 0;
 function ok(value, message) { checks += 1; assert.ok(value, message); }
 
 ok(source.mount.includes("LocalExerciseWorkshopPanel"), "l’atelier est monté dans /admin");
-ok(source.panel.includes("Création, importation et édition locale d’exercices"), "le titre de l’atelier est visible");
+ok(source.panel.includes("Création, importation, édition et publication locale d’exercices"), "le titre enrichi de l’atelier est visible");
 ok(source.panel.includes("Classifier toutes les questions"), "la classification automatique est accessible");
 ok(source.panel.includes("Dimension") && source.panel.includes("Type de réponse"), "la classification peut être corrigée manuellement");
 ok(source.panel.includes("Audit automatique"), "l’audit automatique est affiché");
@@ -27,7 +27,7 @@ ok(source.panel.includes("Entraînement") && source.panel.includes("Simulation")
 ok(source.panel.includes("Importer le JSON collé") && source.panel.includes("Choisir un fichier JSON"), "les deux méthodes d’import sont présentes");
 ok(source.panel.includes("Exporter cet exercice") && source.panel.includes("Exporter la banque locale"), "les exports individuel et global sont présents");
 ok(source.panel.includes("Publier dans le parcours élève"), "la publication locale est explicite");
-ok(source.panel.includes("disabled={!validation.valid}"), "une publication invalide est bloquée");
+ok(source.panel.includes("disabled={!readiness.canPublish || !validation.valid}"), "une publication invalide ou non relue est bloquée");
 
 ok(source.hook.includes("LOCAL_EXERCISE_STORE_KEY"), "la banque partagée lit le stockage local");
 ok(source.hook.includes("includeDrafts"), "l’admin peut inclure les brouillons");
