@@ -1,12 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import baseExercises from "../data/exercises";
-import moreExercises from "../data/moreExercises";
-import genesisExercise from "../data/genesisExercise";
-import secondaryExercises from "../data/secondaryExercises";
 import { auditExerciseContent } from "../../lib/contentCalibration";
-import { normalizeExerciseQuestions, normalizeQuestionLevel } from "../../lib/questionClassification";
+import { normalizeQuestionLevel } from "../../lib/questionClassification";
 import {
   MANUAL_AUDIT_CRITERIA,
   MANUAL_AUDIT_STATUSES,
@@ -18,24 +14,9 @@ import {
   normalizeManualAuditStore,
   summarizeManualAudits
 } from "../../lib/manualPedagogicalAudit";
+import { useExerciseBank } from "../useExerciseBank";
 
-function uniqueExercises(items) {
-  const seen = new Set();
-  return items.filter((exercise) => {
-    if (!exercise?.id || seen.has(exercise.id)) return false;
-    seen.add(exercise.id);
-    return true;
-  });
-}
-
-const exercises = uniqueExercises([
-  ...baseExercises,
-  ...moreExercises,
-  genesisExercise,
-  ...secondaryExercises
-]).map(normalizeExerciseQuestions);
-
-function loadStore() {
+function loadStore(exercises) {
   if (typeof window === "undefined") return normalizeManualAuditStore(null, exercises);
   try {
     return normalizeManualAuditStore(JSON.parse(localStorage.getItem(MANUAL_PEDAGOGICAL_AUDIT_KEY) || "null"), exercises);
@@ -69,8 +50,9 @@ function automaticSnapshot(audit) {
 }
 
 export default function ManualPedagogicalAuditPanel() {
-  const [store, setStore] = useState(() => normalizeManualAuditStore(null, exercises));
-  const [selectedId, setSelectedId] = useState(exercises[0]?.id || "");
+  const { exercises } = useExerciseBank({ includeDrafts: true });
+  const [store, setStore] = useState(() => normalizeManualAuditStore(null, []));
+  const [selectedId, setSelectedId] = useState("");
   const [levelFilter, setLevelFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [message, setMessage] = useState("Chargement du suivi local...");
@@ -78,22 +60,23 @@ export default function ManualPedagogicalAuditPanel() {
 
   const automaticAudits = useMemo(
     () => Object.fromEntries(exercises.map((exercise) => [exercise.id, automaticSnapshot(auditExerciseContent(exercise))])),
-    []
+    [exercises]
   );
 
   useEffect(() => {
-    const loaded = loadStore();
+    const loaded = loadStore(exercises);
     setStore(loaded);
+    setSelectedId((current) => loaded.audits[current] ? current : exercises[0]?.id || "");
     setHydrated(true);
     setMessage("Audit manuel chargé depuis ce navigateur.");
-  }, []);
+  }, [exercises]);
 
   useEffect(() => {
     if (!hydrated || typeof window === "undefined") return;
     localStorage.setItem(MANUAL_PEDAGOGICAL_AUDIT_KEY, JSON.stringify(store));
   }, [hydrated, store]);
 
-  const summary = useMemo(() => summarizeManualAudits(store, exercises), [store]);
+  const summary = useMemo(() => summarizeManualAudits(store, exercises), [store, exercises]);
   const filteredExercises = exercises.filter((exercise) => {
     const levelMatches = levelFilter === "all" || normalizeQuestionLevel(exercise.level) === levelFilter;
     const statusMatches = statusFilter === "all" || store.audits[exercise.id]?.status === statusFilter;
@@ -109,7 +92,7 @@ export default function ManualPedagogicalAuditPanel() {
     if (!filteredExercises.some((exercise) => exercise.id === selectedId) && filteredExercises[0]) {
       setSelectedId(filteredExercises[0].id);
     }
-  }, [levelFilter, statusFilter]);
+  }, [levelFilter, statusFilter, exercises, store]);
 
   function updateEntry(updater, confirmation = "Modification enregistrée localement.") {
     if (!selectedExercise) return;
@@ -172,7 +155,7 @@ export default function ManualPedagogicalAuditPanel() {
         <div>
           <p className="eyebrow">Validation humaine</p>
           <h2>Audit pédagogique manuel</h2>
-          <p>Cette grille complète l’audit automatique. Elle ne le remplace pas et reste enregistrée uniquement dans ce navigateur.</p>
+          <p>Cette grille complète l’audit automatique. Les exercices locaux enregistrés dans le bloc 10 sont ajoutés automatiquement.</p>
         </div>
         <span className="badge">{summary.completionRate}% évalué</span>
       </div>
@@ -186,8 +169,7 @@ export default function ManualPedagogicalAuditPanel() {
       </div>
 
       <div className="manualAuditToolbar">
-        <label>
-          Niveau
+        <label>Niveau
           <select value={levelFilter} onChange={(event) => setLevelFilter(event.target.value)}>
             <option value="all">Tous les niveaux</option>
             <option value="6e">6e année</option>
@@ -195,15 +177,13 @@ export default function ManualPedagogicalAuditPanel() {
             <option value="sec2">Secondaire 2</option>
           </select>
         </label>
-        <label>
-          Statut manuel
+        <label>Statut manuel
           <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
             <option value="all">Tous les statuts</option>
             {Object.entries(MANUAL_AUDIT_STATUSES).map(([id, label]) => <option value={id} key={id}>{label}</option>)}
           </select>
         </label>
-        <label className="manualAuditExerciseSelect">
-          Texte
+        <label className="manualAuditExerciseSelect">Texte
           <select value={selectedExercise?.id || ""} onChange={(event) => setSelectedId(event.target.value)}>
             {filteredExercises.map((exercise) => (
               <option value={exercise.id} key={exercise.id}>{exercise.level} — {exercise.title}</option>
@@ -213,7 +193,7 @@ export default function ManualPedagogicalAuditPanel() {
         <button type="button" onClick={exportAll}>Exporter tous les audits JSON</button>
       </div>
 
-      {!selectedExercise || !selectedEntry ? (
+      {!selectedExercise || !selectedEntry || !selectedAutomatic ? (
         <p className="yellow">Aucun texte ne correspond aux filtres choisis.</p>
       ) : (
         <>
@@ -234,9 +214,7 @@ export default function ManualPedagogicalAuditPanel() {
           </div>
 
           <div className="manualAuditProgress" aria-label="Avancement de l’audit sélectionné">
-            <span>{counts.pass} conformes</span>
-            <span>{counts.review} à revoir</span>
-            <span>{counts.pending} non évalués</span>
+            <span>{counts.pass} conformes</span><span>{counts.review} à revoir</span><span>{counts.pending} non évalués</span>
           </div>
 
           {Object.entries(MANUAL_AUDIT_CRITERIA).map(([groupId, group]) => (
@@ -245,11 +223,7 @@ export default function ManualPedagogicalAuditPanel() {
               {Object.entries(group.items).map(([criterionId, label]) => (
                 <div className="manualAuditRow" key={criterionId}>
                   <label htmlFor={`${selectedExercise.id}-${groupId}-${criterionId}`}>{label}</label>
-                  <select
-                    id={`${selectedExercise.id}-${groupId}-${criterionId}`}
-                    value={selectedEntry.criteria[groupId][criterionId]}
-                    onChange={(event) => updateCriterion(groupId, criterionId, event.target.value)}
-                  >
+                  <select id={`${selectedExercise.id}-${groupId}-${criterionId}`} value={selectedEntry.criteria[groupId][criterionId]} onChange={(event) => updateCriterion(groupId, criterionId, event.target.value)}>
                     {Object.entries(MANUAL_CRITERION_VALUES).map(([id, valueLabel]) => <option value={id} key={id}>{valueLabel}</option>)}
                   </select>
                 </div>
@@ -258,32 +232,16 @@ export default function ManualPedagogicalAuditPanel() {
           ))}
 
           <div className="manualAuditDecision card">
-            <label>
-              Statut manuel du texte
-              <select
-                value={selectedEntry.status}
-                onChange={(event) => updateEntry((entry) => ({ ...entry, status: event.target.value }))}
-              >
+            <label>Statut manuel du texte
+              <select value={selectedEntry.status} onChange={(event) => updateEntry((entry) => ({ ...entry, status: event.target.value }))}>
                 {Object.entries(MANUAL_AUDIT_STATUSES).map(([id, label]) => <option value={id} key={id}>{label}</option>)}
               </select>
             </label>
-            <label>
-              Validateur ou initiales — facultatif
-              <input
-                value={selectedEntry.reviewer}
-                maxLength={120}
-                onChange={(event) => updateEntry((entry) => ({ ...entry, reviewer: event.target.value }))}
-                placeholder="Ex. MP"
-              />
+            <label>Validateur ou initiales — facultatif
+              <input value={selectedEntry.reviewer} maxLength={120} onChange={(event) => updateEntry((entry) => ({ ...entry, reviewer: event.target.value }))} placeholder="Ex. MP" />
             </label>
-            <label className="manualAuditNotes">
-              Notes de validation
-              <textarea
-                value={selectedEntry.notes}
-                maxLength={4000}
-                onChange={(event) => updateEntry((entry) => ({ ...entry, notes: event.target.value }))}
-                placeholder="Forces, éléments à corriger, vérifications factuelles à compléter..."
-              />
+            <label className="manualAuditNotes">Notes de validation
+              <textarea value={selectedEntry.notes} maxLength={4000} onChange={(event) => updateEntry((entry) => ({ ...entry, notes: event.target.value }))} placeholder="Forces, éléments à corriger, vérifications factuelles à compléter..." />
             </label>
             {selectedEntry.updatedAt && <p className="smallText">Dernière modification : {new Date(selectedEntry.updatedAt).toLocaleString("fr-CA")}</p>}
             {warnings.map((warning) => <p className="yellow" key={warning}><b>Attention :</b> {warning}</p>)}
