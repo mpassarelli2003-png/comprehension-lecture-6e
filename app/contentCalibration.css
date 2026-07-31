@@ -1,0 +1,27 @@
+.contentCalibrationAdmin{border:2px solid #55708f;background:#f7faff}
+.contentCalibrationHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.contentCalibrationHeader h2{margin:.15rem 0 .4rem}
+.contentCalibrationStats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:16px 0}
+.contentCalibrationStats>div{display:flex;flex-direction:column;gap:4px;padding:13px;border:1px solid #a8b5c5;border-radius:12px;background:white;text-align:center}
+.contentCalibrationStats b{font-size:1.55rem}
+.contentCalibrationStats span{font-size:.9rem;color:#4f5968}
+.contentCalibrationGrid{display:grid;grid-template-columns:1.15fr .8fr .8fr;gap:12px}
+.contentCalibrationGrid>div{padding:14px;border:1px solid #a8b5c5;border-radius:13px;background:white}
+.contentCalibrationGrid h3{margin-top:0}
+.calibrationLevelCard{padding:10px;border-left:4px solid #55708f;background:#f4f7fb;margin:8px 0}
+.calibrationLevelCard p{margin:.25rem 0}
+.smallText{font-size:.9rem;line-height:1.4;color:#4f5968}
+.contentCalibrationActions{display:grid;grid-template-columns:minmax(160px,.6fr) minmax(200px,1fr) auto auto;gap:8px;align-items:end;margin:16px 0}
+.contentCalibrationActions label{grid-column:1}
+.contentCalibrationActions select{grid-column:2;margin:0}
+.contentCalibrationTableWrap{overflow-x:auto;margin-top:12px}
+.contentCalibrationTable{width:100%;border-collapse:collapse;background:white;font-size:.92rem}
+.contentCalibrationTable th,.contentCalibrationTable td{padding:10px;border:1px solid #c6cdd6;vertical-align:top;text-align:left}
+.contentCalibrationTable th{background:#eaf0f7;white-space:nowrap}
+.contentCalibrationTable td small{display:block;margin-top:5px;max-width:330px;color:#6e4e00;line-height:1.35}
+.calibrationStatus{display:inline-block;border-radius:999px;padding:5px 9px;font-weight:700;white-space:nowrap}
+.calibrationStatus-ready{background:#e4f6e7;border:1px solid #438a4c}
+.calibrationStatus-review{background:#fff7d6;border:1px solid #b99000}
+.calibrationStatus-blocked{background:#ffe6e6;border:1px solid #b43b3b}
+@media(max-width:1100px){.contentCalibrationStats{grid-template-columns:repeat(3,minmax(0,1fr))}.contentCalibrationGrid{grid-template-columns:1fr}.contentCalibrationActions{grid-template-columns:1fr 1fr}.contentCalibrationActions label,.contentCalibrationActions select{grid-column:auto}}
+@media(max-width:700px){.contentCalibrationHeader{flex-direction:column}.contentCalibrationStats{grid-template-columns:1fr 1fr}.contentCalibrationActions{grid-template-columns:1fr}.contentCalibrationActions button,.contentCalibrationActions select{width:100%;margin:0}.contentCalibrationTable{font-size:.82rem}}
