@@ -1,5 +1,7 @@
 import "./globals.css";
+import "./formativeFeedback.css";
 import ProgressiveAnswerGuard from "./ProgressiveAnswerGuard";
+import FormativeFeedbackPanel from "./FormativeFeedbackPanel";
 import GuidedReadingCoach from "./GuidedReadingCoach";
 
 export const metadata = {
@@ -17,9 +19,11 @@ export default function RootLayout({ children }) {
           <a className="voiceHelpButton" href="/aide-vocale">Aide vocale IA</a>
           <a className="adminButton" href="/admin/login">Admin</a>
         </nav>
-        <ProgressiveAnswerGuard>
-          <GuidedReadingCoach>{children}</GuidedReadingCoach>
-        </ProgressiveAnswerGuard>
+        <FormativeFeedbackPanel>
+          <ProgressiveAnswerGuard>
+            <GuidedReadingCoach>{children}</GuidedReadingCoach>
+          </ProgressiveAnswerGuard>
+        </FormativeFeedbackPanel>
       </body>
     </html>
   );
