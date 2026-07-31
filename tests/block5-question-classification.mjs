@@ -1,9 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-
-const source = await readFile(new URL("../lib/questionClassification.js", import.meta.url), "utf8");
-const moduleUrl = `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`;
-const classification = await import(moduleUrl);
+import * as classification from "../lib/questionClassification.js";
 
 const {
   buildQuestionBank,
