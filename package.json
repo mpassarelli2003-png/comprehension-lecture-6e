@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "test:block5": "node tests/block5-question-classification.mjs && node tests/block5-bank-audit.mjs",
-    "prebuild": "npm run test:block5",
+    "test:block6": "node tests/block6-formative-feedback.mjs && node tests/block6-feedback-audit.mjs",
+    "prebuild": "npm run test:block5 && npm run test:block6",
     "build": "next build",
     "start": "next start"
   },
