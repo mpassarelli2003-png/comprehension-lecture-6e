@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./formativeFeedback.css";
 import ProgressiveAnswerGuard from "./ProgressiveAnswerGuard";
 import FormativeFeedbackPanel from "./FormativeFeedbackPanel";
 import GuidedReadingCoach from "./GuidedReadingCoach";
