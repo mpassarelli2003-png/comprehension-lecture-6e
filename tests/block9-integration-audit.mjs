@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [panel, mount, layout, logic, css] = await Promise.all([
+const [panel, mount, layout, logic, css, bankHook] = await Promise.all([
   readFile(new URL("../app/admin/ManualPedagogicalAuditPanel.jsx", import.meta.url), "utf8"),
   readFile(new URL("../app/admin/ContentCalibrationAdminMount.jsx", import.meta.url), "utf8"),
   readFile(new URL("../app/layout.jsx", import.meta.url), "utf8"),
   readFile(new URL("../lib/manualPedagogicalAudit.js", import.meta.url), "utf8"),
-  readFile(new URL("../app/manualPedagogicalAudit.css", import.meta.url), "utf8")
+  readFile(new URL("../app/manualPedagogicalAudit.css", import.meta.url), "utf8"),
+  readFile(new URL("../app/useExerciseBank.js", import.meta.url), "utf8")
 ]);
 
 let checks = 0;
@@ -23,7 +24,9 @@ ok(panel.includes("localStorage.getItem"), "les audits sont chargés du navigate
 ok(panel.includes("localStorage.setItem"), "les audits sont sauvegardés dans le navigateur");
 ok(panel.includes("buildManualAuditExport"), "l’export JSON est branché");
 ok(panel.includes("auditExerciseContent"), "l’audit automatique reste visible séparément");
-ok(panel.includes("secondaryExercises"), "les textes secondaires sont inclus explicitement");
+ok(panel.includes("useExerciseBank({ includeDrafts: true })"), "l’audit manuel lit la banque partagée");
+ok(bankHook.includes("secondaryExercises"), "la banque partagée inclut explicitement les textes secondaires");
+ok(bankHook.includes("LOCAL_EXERCISE_STORE_KEY"), "la banque partagée peut aussi inclure les exercices locaux");
 ok(panel.includes("Exporter tous les audits JSON"), "un export complet est offert");
 ok(panel.includes("Exporter ce texte"), "un export par exercice est offert");
 ok(panel.includes("Statut manuel du texte"), "le statut manuel est modifiable");
