@@ -6,6 +6,7 @@ import baseExercises from "./data/exercises";
 import moreExercises from "./data/moreExercises";
 import genesisExercise from "./data/genesisExercise";
 import {
+  FINAL_READING_CHECKLIST,
   evaluateExerciseSubmission,
   evaluateReadingAnswer
 } from "../lib/formativeFeedback";
@@ -197,11 +198,21 @@ export default function FormativeFeedbackPanel({ children }) {
     );
   }, [context]);
 
-  function blockWithFeedback(event, message = "") {
-    stopInteraction(event);
+  function showFeedback(message = "") {
     setAttempted(true);
     setNotice(message || feedback?.nextStep || "Complète ta réponse avant de continuer.");
     window.setTimeout(() => document.querySelector(".formativeFeedback")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+  }
+
+  function blockWithFeedback(event, message = "") {
+    stopInteraction(event);
+    showFeedback(message);
+  }
+
+  function letProgressiveGuardHandleEmpty() {
+    return feedback?.status === "missing"
+      && context?.step === 5
+      && Boolean(document.querySelector("main .grid.cols textarea"));
   }
 
   function handleClickCapture(event) {
@@ -225,10 +236,8 @@ export default function FormativeFeedbackPanel({ children }) {
       const summary = evaluateExerciseSubmission(exercise, work, { modeId: "simulation" });
       setSubmission(summary);
       if (!summary.readyToSubmit) {
-        stopInteraction(event);
-        setAttempted(true);
-        setNotice("Tu ne peux pas encore remettre. Certaines réponses doivent être complétées.");
-        window.setTimeout(() => document.querySelector(".formativeFeedback")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+        showFeedback("Tu ne peux pas encore remettre. Certaines réponses doivent être complétées.");
+        if (summary.missingQuestions === 0) stopInteraction(event);
       }
       return;
     }
@@ -236,6 +245,10 @@ export default function FormativeFeedbackPanel({ children }) {
     if (!context?.hasQuestion || !feedback) return;
 
     if (label === "Question suivante" && !feedback.canContinue) {
+      if (letProgressiveGuardHandleEmpty()) {
+        showFeedback();
+        return;
+      }
       blockWithFeedback(event);
       return;
     }
@@ -244,6 +257,10 @@ export default function FormativeFeedbackPanel({ children }) {
     const target = targetStep(button);
     const leavingResponseWork = target > current && target >= 6;
     if (leavingResponseWork && !feedback.canContinue) {
+      if (letProgressiveGuardHandleEmpty()) {
+        showFeedback();
+        return;
+      }
       blockWithFeedback(event);
       return;
     }
@@ -307,6 +324,20 @@ export default function FormativeFeedbackPanel({ children }) {
             <button type="button" className="blue" onClick={() => { setAttempted(true); refresh(50); }}>Vérifier ma réponse</button>
             {context.step === 5 && <button type="button" onClick={() => document.querySelector("main .grid.cols textarea")?.focus()}>Retourner à ma réponse</button>}
           </div>
+
+          {context.step === 5 && (
+            <details className="formativeChecklist">
+              <summary><b>Grille finale simplifiée</b></summary>
+              <div className="formativeChecklistGrid">
+                {FINAL_READING_CHECKLIST.map((group) => (
+                  <div key={group.group}>
+                    <h3>{group.group}</h3>
+                    {group.items.map((item) => <p key={item}>☐ {item}</p>)}
+                  </div>
+                ))}
+              </div>
+            </details>
+          )}
         </section>
       )}
 
