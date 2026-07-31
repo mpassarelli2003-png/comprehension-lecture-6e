@@ -8,7 +8,7 @@
     "test:block6": "node tests/block6-formative-feedback.mjs && node tests/block6-feedback-audit.mjs && node tests/block6-integration-audit.mjs && node tests/block6-real-question-scenarios.mjs",
     "test:block7": "node tests/block7-progress-tracking.mjs && node tests/block7-integration-audit.mjs",
     "test:block8": "node tests/block8-content-calibration.mjs && node tests/block8-integration-audit.mjs && node tests/block8-real-path-scenarios.mjs",
-    "test:block9": "node tests/block9-manual-pedagogical-audit.mjs && node tests/block9-integration-audit.mjs && node tests/block9-real-bank-coverage.mjs",
+    "test:block9": "node tests/block9-manual-pedagogical-audit.mjs && node tests/block9-integration-audit.mjs && node tests/block9-real-bank-coverage.mjs && node tests/block9-real-manual-audit-flow.mjs",
     "prebuild": "npm run test:block5 && npm run test:block6 && npm run test:block7 && npm run test:block8 && npm run test:block9",
     "build": "next build",
     "start": "next start"
