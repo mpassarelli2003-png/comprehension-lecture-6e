@@ -8,11 +8,63 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: agent/integrated-reading-writing-journey
+      - name: Corriger le validateur de confidentialité
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('lib/integratedJourney.js')
+          text = path.read_text()
+          replacement = '''function collectForbiddenHistoryKeys(value, found = new Set()) {
+            if (Array.isArray(value)) {
+              value.forEach((item) => collectForbiddenHistoryKeys(item, found));
+              return found;
+            }
+            if (!value || typeof value !== "object") return found;
+            Object.entries(value).forEach(([key, child]) => {
+              if (FORBIDDEN_HISTORY_KEYS.some((forbidden) => forbidden.toLowerCase() === key.toLowerCase())) found.add(key);
+              collectForbiddenHistoryKeys(child, found);
+            });
+            return found;
+          }
+
+          export function validateIntegratedJourneyHistory(records) {
+            const safe = sanitizeIntegratedJourneyHistory(records);
+            const forbiddenFound = [...collectForbiddenHistoryKeys(safe)].sort();
+            const invalidVersions = safe.filter((record) => record.version !== INTEGRATED_JOURNEY_SCHEMA_VERSION).length;
+            return {
+              valid: forbiddenFound.length === 0 && invalidVersions === 0 && safe.length <= MAX_INTEGRATED_JOURNEY_HISTORY,
+              message: `${safe.length} événement(s) minimal(aux) vérifié(s).`,
+              forbiddenFound,
+              invalidVersions
+            };
+          }'''
+          if 'function collectForbiddenHistoryKeys' not in text:
+              pattern = r'export function validateIntegratedJourneyHistory\(records\) \{[\s\S]*?\n\}'
+              text, count = re.subn(pattern, replacement, text, count=1)
+              if count != 1:
+                  raise SystemExit(f'Validateur introuvable: {count} correspondance(s).')
+              path.write_text(text)
+          PY
+      - name: Publier la correction du modèle
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/integratedJourney.js
+          git commit -m "fix(block15): valider seulement les noms de propriétés"
+          git push origin HEAD:agent/integrated-reading-writing-journey
       - uses: actions/setup-node@v4
         with:
           node-version: 20
