@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import LocalExerciseWorkshopPanel from "./LocalExerciseWorkshopPanel";
+import LocalBackupRestorePanel from "./LocalBackupRestorePanel";
 import ContentCalibrationAdminPanel from "./ContentCalibrationAdminPanel";
 import ManualPedagogicalAuditPanel from "./ManualPedagogicalAuditPanel";
 
@@ -13,6 +14,7 @@ export default function ContentCalibrationAdminMount({ children }) {
       {pathname === "/admin" && (
         <section className="page">
           <LocalExerciseWorkshopPanel />
+          <LocalBackupRestorePanel />
           <ContentCalibrationAdminPanel />
           <ManualPedagogicalAuditPanel />
         </section>
