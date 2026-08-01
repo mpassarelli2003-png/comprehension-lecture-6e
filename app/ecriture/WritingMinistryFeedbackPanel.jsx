@@ -6,6 +6,10 @@ import {
   analyzeWritingForRevision,
   buildWritingSimulationChecklist
 } from "../../lib/writingMinistryFeedback";
+import {
+  recordWritingAnalysisEvent,
+  recordWritingSelfAssessmentEvent
+} from "../../lib/writingRevisionHistory";
 
 function stateLabel(state) {
   if (state === "review") return "À revoir";
@@ -22,7 +26,9 @@ export default function WritingMinistryFeedbackPanel({
   writingBrief,
   examMode,
   checks,
-  setChecks
+  setChecks,
+  levelId = "6e",
+  step = 5
 }) {
   const mode = examMode ? "simulation" : "training";
   const [feedback, setFeedback] = useState(null);
@@ -42,14 +48,35 @@ export default function WritingMinistryFeedbackPanel({
   const simulationChecklist = useMemo(() => buildWritingSimulationChecklist(), []);
 
   function analyze() {
-    setFeedback(analyzeWritingForRevision({
+    const nextFeedback = analyzeWritingForRevision({
       text: draft,
       audience: writingBrief.audience,
       purpose: writingBrief.purpose,
       textType: writingBrief.type,
       minimumParagraphs: writingBrief.minimumParagraphs,
       mode: "training"
-    }));
+    });
+    setFeedback(nextFeedback);
+    recordWritingAnalysisEvent(nextFeedback, {
+      levelId,
+      textTypeId: writingBrief.typeId,
+      step
+    });
+  }
+
+  function toggleSimulationCriterion(item) {
+    const key = criterionCheckKey(item.id);
+    const nextChecks = { ...checks, [key]: !checks[key] };
+    const wasComplete = simulationChecklist.every((criterion) => Boolean(checks[criterionCheckKey(criterion.id)]));
+    const isComplete = simulationChecklist.every((criterion) => Boolean(nextChecks[criterionCheckKey(criterion.id)]));
+    setChecks(nextChecks);
+    if (!wasComplete && isComplete) {
+      recordWritingSelfAssessmentEvent({
+        levelId,
+        textTypeId: writingBrief.typeId,
+        step
+      });
+    }
   }
 
   if (examMode) {
@@ -67,7 +94,7 @@ export default function WritingMinistryFeedbackPanel({
               <input
                 type="checkbox"
                 checked={Boolean(checks[key])}
-                onChange={() => setChecks({ ...checks, [key]: !checks[key] })}
+                onChange={() => toggleSimulationCriterion(item)}
               />
               <span><b>{item.label}</b><small>{item.action}</small></span>
             </label>
