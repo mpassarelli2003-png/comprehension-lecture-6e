@@ -1,4 +1,5 @@
 import { revisionCheckKey, successCheckKey } from "../../lib/writingSynchronization";
+import WritingMinistryFeedbackPanel from "./WritingMinistryFeedbackPanel";
 
 function paragraphCount(text) {
   return String(text || "").split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean).length;
@@ -9,7 +10,7 @@ function hasAny(text, words) {
   return words.some((word) => lower.includes(word.toLowerCase()));
 }
 
-export default function Step5Revision({ draft, checks, setChecks, writingBrief, plan, wordCount }) {
+export default function Step5Revision({ draft, checks, setChecks, writingBrief, plan, wordCount, examMode }) {
   const words = wordCount(draft);
   const paragraphs = paragraphCount(draft);
   const hasTextProofWords = hasAny(draft, ["dans le texte", "par exemple", "on apprend", "le texte dit", "un exemple"]);
@@ -19,8 +20,8 @@ export default function Step5Revision({ draft, checks, setChecks, writingBrief, 
 
   return (
     <div>
-      <h2>Étape 5 — Je révise mes idées</h2>
-      <div className="card yellow"><b>But de cette étape</b><p>La grille ci-dessous est générée à partir du type de texte, du destinataire, du but et de la consigne actuels.</p></div>
+      <h2>Étape 5 — Je révise mes idées et mon texte</h2>
+      <div className="card yellow"><b>But de cette étape</b><p>Je vérifie d’abord les cinq critères ministériels, puis les exigences propres à mon type de texte, à mon destinataire, à mon but et à ma consigne.</p></div>
 
       <div className="card">
         <b>Consigne à vérifier</b>
@@ -37,6 +38,19 @@ export default function Step5Revision({ draft, checks, setChecks, writingBrief, 
         <p>Conclusion repérée : <b>{hasConclusionWords ? "oui" : "à vérifier"}</b></p>
         <p>Critères de révision répondus : <b>{checkedRevisionCount}</b> / {writingBrief.revisionCriteria.length}</p>
         <p>Critères de réussite confirmés : <b>{checkedSuccessCount}</b> / {writingBrief.successCriteria.length}</p>
+      </div>
+
+      <WritingMinistryFeedbackPanel
+        draft={draft}
+        writingBrief={writingBrief}
+        examMode={examMode}
+        checks={checks}
+        setChecks={setChecks}
+      />
+
+      <div className="card">
+        <h3>Révision propre au type de texte</h3>
+        <p>Ces questions complètent les cinq critères ministériels en tenant compte de la consigne actuelle.</p>
       </div>
 
       {writingBrief.revisionCriteria.map((item) => {
