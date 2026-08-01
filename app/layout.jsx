@@ -6,6 +6,7 @@ import "./manualPedagogicalAudit.css";
 import "./localExerciseWorkshop.css";
 import "./localBackupRestore.css";
 import "./writingMinistryFeedback.css";
+import "./writingRevisionHistory.css";
 import ProgressiveAnswerGuard from "./ProgressiveAnswerGuard";
 import FormativeFeedbackPanel from "./FormativeFeedbackPanel";
 import GuidedReadingCoach from "./GuidedReadingCoach";
