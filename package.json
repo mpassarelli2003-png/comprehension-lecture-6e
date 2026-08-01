@@ -12,7 +12,8 @@
     "test:block10": "node tests/block10-local-exercise-workshop.mjs && node tests/block10-integration-audit.mjs",
     "test:block11": "node tests/block11-publication-readiness.mjs && node tests/block11-integration-audit.mjs",
     "test:block11b": "node tests/block11b-real-publication-flow.mjs",
-    "prebuild": "npm run test:block5 && npm run test:block6 && npm run test:block7 && npm run test:block8 && npm run test:block9 && npm run test:block10 && npm run test:block11 && npm run test:block11b",
+    "test:block12": "node tests/block12-local-backup-restore.mjs && node tests/block12-integration-audit.mjs",
+    "prebuild": "npm run test:block5 && npm run test:block6 && npm run test:block7 && npm run test:block8 && npm run test:block9 && npm run test:block10 && npm run test:block11 && npm run test:block11b && npm run test:block12",
     "build": "next build",
     "start": "next start"
   },
