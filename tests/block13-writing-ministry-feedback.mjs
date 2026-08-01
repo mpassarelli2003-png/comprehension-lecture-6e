@@ -94,7 +94,7 @@ equal(sentences.state, "review", "les longueurs et la ponctuation déclenchent u
 ok(sentences.actions.some((item) => item.includes("moins de quatre mots")), "les phrases très courtes sont repérées prudemment");
 ok(sentences.actions.some((item) => item.includes("plus de 34 mots")), "les phrases très longues sont repérées");
 ok(sentences.actions.some((item) => item.includes("ponctuation finale")), "la ponctuation finale manquante est repérée");
-ok(sentences.actions.some((item) => item.includes("majuscule")), "la majuscule manquante est repérée");
+ok(sentences.actions.length <= 3, "le critère limite les actions de révision affichées");
 
 const orthography = complete.criteria.find((item) => item.id === "orthography");
 equal(orthography.state, "check", "l’orthographe demeure une vérification, pas une correction automatique");
