@@ -267,7 +267,7 @@ export default function WritingPage() {
           {step === 2 && <Step2Ideas writingBrief={writingBrief} ideas={ideas} updateIdea={updateIdea} prepareIdeasFromConsigne={prepareIdeasFromConsigne} filledIdeas={filledIdeas} ideasWithProof={ideasWithProof} readyForPlan={readyForPlan} />}
           {step === 3 && <Step3Plan writingBrief={writingBrief} ideas={ideas} plan={plan} setPlan={setPlan} readyForPlan={readyForPlan} />}
           {step === 4 && <Step4Draft writingBrief={writingBrief} plan={plan} draft={draft} setDraft={setDraft} insertInDraft={insertInDraft} wordCount={wordCount} />}
-          {step === 5 && <Step5Revision draft={draft} checks={checks} setChecks={setChecks} writingBrief={writingBrief} plan={plan} wordCount={wordCount} />}
+          {step === 5 && <Step5Revision draft={draft} checks={checks} setChecks={setChecks} writingBrief={writingBrief} plan={plan} wordCount={wordCount} examMode={examMode} />}
           {step === 6 && <Step6Correction draft={draft} checks={checks} setChecks={setChecks} />}
           {step === 7 && <div><h2>Étape 7 — Je mets au propre</h2><p><b>Contrat final :</b> {writingBrief.type} pour {writingBrief.audience}, afin de {writingBrief.purpose}.</p><p><b>Compteur approximatif :</b> {wordCount(finalText)} mots</p><textarea style={{ minHeight: 480 }} value={finalText} onChange={(event) => setFinalText(event.target.value)} placeholder="Écris ta version finale ici." /><button className="green" onClick={() => navigator.clipboard?.writeText(finalText)}>Copier ma version finale</button></div>}
         </section>
