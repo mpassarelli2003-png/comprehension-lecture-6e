@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - agent/writing-ministry-feedback
+  pull_request:
+    branches:
+      - main
 
 jobs:
   diagnose:
