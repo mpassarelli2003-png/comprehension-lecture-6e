@@ -54,9 +54,7 @@ const exercises = uniqueExercises([...baseExercises, ...moreExercises, genesisEx
 let checks = 0;
 function ok(value, message) { checks += 1; assert.ok(value, message); }
 function equal(actual, expected, message) { checks += 1; assert.equal(actual, expected, message); }
-function deepEqual(actual, expected, message) { checks += 1; assert.deepEqual(actual, expected, message); }
 
-// Banque intégrée et cohérence pédagogique.
 const summary = summarizeIntegratedJourneyBank(BUILT_IN_INTEGRATED_JOURNEYS, exercises);
 equal(summary.total, 4, "quatre parcours intégrés sont fournis");
 equal(summary.blocked, 0, "aucun parcours intégré n’est bloqué");
@@ -71,7 +69,6 @@ for (const journey of BUILT_IN_INTEGRATED_JOURNEYS) {
   equal(audit.errors.length, 0, `${journey.id} ne contient aucune erreur bloquante`);
 }
 
-// Niveau incohérent : blocage.
 const mismatch = validateIntegratedJourney({
   ...BUILT_IN_INTEGRATED_JOURNEYS[0],
   id: "niveau-incoherent",
@@ -80,7 +77,6 @@ const mismatch = validateIntegratedJourney({
 equal(mismatch.valid, false, "un niveau incohérent bloque le parcours");
 ok(mismatch.errors.some((error) => error.includes("ne correspond pas")), "le conflit de niveau est expliqué");
 
-// Intention d’écriture peu cohérente : avertissement, pas publication silencieuse.
 const weakCoherence = validateIntegratedJourney({
   ...BUILT_IN_INTEGRATED_JOURNEYS[0],
   id: "intention-a-revoir",
@@ -89,7 +85,6 @@ const weakCoherence = validateIntegratedJourney({
 }, exercises);
 ok(weakCoherence.warnings.length > 0, "une intention peu cohérente produit un avertissement");
 
-// Parcours complet en entraînement.
 const trainingStorage = memoryStorage();
 const trainingJourney = BUILT_IN_INTEGRATED_JOURNEYS[0];
 const trainingExercise = exercises.find((exercise) => exercise.id === trainingJourney.exerciseId);
@@ -103,7 +98,6 @@ const emptyInspection = inspectReadingWork(emptyReading, trainingExercise);
 equal(emptyInspection.readyForWriting, false, "une écriture sans préparation est signalée");
 ok(emptyInspection.warning.includes("aucune lecture préparatoire"), "le signalement est explicite");
 
-// La lecture autonome sans parcours demeure possible : aucune fonction n’exige un actif.
 const standaloneInspection = inspectReadingWork({ answers: {}, notes: {}, proofs: [], step: 1 }, trainingExercise);
 equal(standaloneInspection.readingStarted, false, "une lecture autonome vide reste un état valide");
 equal(readActiveIntegratedJourney(memoryStorage()), null, "aucun parcours actif n’est requis pour lire");
@@ -121,7 +115,8 @@ const readingInspection = inspectReadingWork(trainingReading, trainingExercise);
 equal(readingInspection.questionsCompleted, 2, "deux questions complétées sont comptées");
 equal(readingInspection.readyForWriting, true, "la lecture prépare maintenant l’écriture");
 
-const trainingSheet = buildJourneyNoteSheet(trainingReading, trainingExercise, "training");nequal(trainingSheet.modeId, "training", "la feuille respecte le mode entraînement");
+const trainingSheet = buildJourneyNoteSheet(trainingReading, trainingExercise, "training");
+equal(trainingSheet.modeId, "training", "la feuille respecte le mode entraînement");
 ok(trainingSheet.rows.length >= 3, "la feuille guidée comporte plusieurs lignes");
 ok(trainingSheet.rows.some((row) => row.sourceType === "reading-note"), "les notes de lecture de l’élève peuvent être transférées dans la feuille active");
 ok(trainingSheet.rows.some((row) => row.sourceType === "selected-passage"), "un passage choisi peut être transféré dans la feuille active");
@@ -186,7 +181,6 @@ equal(trainingExport.privacy.containsStudentAnswers, false, "l’export déclare
 equal(trainingExport.privacy.containsWritingDrafts, false, "l’export déclare l’absence de brouillons");
 equal(trainingExport.privacy.containsFinalTexts, false, "l’export déclare l’absence de versions finales");
 
-// Parcours complet en simulation.
 const simulationStorage = memoryStorage();
 const simulationJourney = BUILT_IN_INTEGRATED_JOURNEYS.find((journey) => journey.levelId === "sec2");
 const simulationExercise = exercises.find((exercise) => exercise.id === simulationJourney.exerciseId);
@@ -201,7 +195,8 @@ const simulationReading = {
   answers: { [simulationExercise.questions[0].id]: "Réponse de simulation locale." }
 };
 const simulationSheet = buildJourneyNoteSheet(simulationReading, simulationExercise, "simulation");
-equal(simulationSheet.modeId, "simulation", "la feuille conserve le mode simulation");nok(simulationSheet.rows.length <= 5, "la feuille de simulation est limitée à cinq lignes");
+equal(simulationSheet.modeId, "simulation", "la feuille conserve le mode simulation");
+ok(simulationSheet.rows.length <= 5, "la feuille de simulation est limitée à cinq lignes");
 ok(simulationSheet.rows.every((row) => row.sourceType !== "question"), "aucune question-guide n’est générée en simulation");
 ok(simulationSheet.rows.every((row) => !row.sourceLabel.includes("Question complétée")), "aucune aide de contenu liée aux questions n’apparaît en simulation");
 const simulationWriting = buildWritingWorkForJourney(simulationJourney, simulationSheet, "simulation");
@@ -232,7 +227,6 @@ const simulationSync = synchronizeIntegratedJourney(
 );
 equal(simulationSync.active.stage, "review", "la simulation atteint le bilan sans aide personnalisée");
 
-// Doublons, limite et parcours locaux.
 let deduped = [];
 const fixedEvent = {
   occurredAt: "2026-08-01T20:00:00.000Z",
