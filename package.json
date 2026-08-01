@@ -16,7 +16,8 @@
     "test:block13": "node tests/block13-writing-ministry-feedback.mjs && node tests/block13-integration-audit.mjs",
     "test:block13b": "node tests/block13b-real-writing-feedback-flow.mjs",
     "test:block14": "node tests/block14-writing-revision-history.mjs && node tests/block14-integration-audit.mjs",
-    "prebuild": "npm run test:block5 && npm run test:block6 && npm run test:block7 && npm run test:block8 && npm run test:block9 && npm run test:block10 && npm run test:block11 && npm run test:block11b && npm run test:block12 && npm run test:block13 && npm run test:block13b && npm run test:block14",
+    "test:block15": "node tests/block15-integrated-journey.mjs && node tests/block15-integration-audit.mjs",
+    "prebuild": "npm run test:block5 && npm run test:block6 && npm run test:block7 && npm run test:block8 && npm run test:block9 && npm run test:block10 && npm run test:block11 && npm run test:block11b && npm run test:block12 && npm run test:block13 && npm run test:block13b && npm run test:block14 && npm run test:block15",
     "build": "next build",
     "start": "next start"
   },
