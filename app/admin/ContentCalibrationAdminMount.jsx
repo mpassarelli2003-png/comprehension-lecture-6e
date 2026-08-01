@@ -5,6 +5,7 @@ import LocalExerciseWorkshopPanel from "./LocalExerciseWorkshopPanel";
 import LocalBackupRestorePanel from "./LocalBackupRestorePanel";
 import ContentCalibrationAdminPanel from "./ContentCalibrationAdminPanel";
 import ManualPedagogicalAuditPanel from "./ManualPedagogicalAuditPanel";
+import AdminWritingRevisionHistory from "./AdminWritingRevisionHistory";
 
 export default function ContentCalibrationAdminMount({ children }) {
   const pathname = usePathname();
@@ -17,6 +18,7 @@ export default function ContentCalibrationAdminMount({ children }) {
           <LocalBackupRestorePanel />
           <ContentCalibrationAdminPanel />
           <ManualPedagogicalAuditPanel />
+          <AdminWritingRevisionHistory />
         </section>
       )}
     </>

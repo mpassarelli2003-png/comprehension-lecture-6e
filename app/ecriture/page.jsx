@@ -18,6 +18,7 @@ import {
   revisionCheckKey,
   successCheckKey
 } from "../../lib/writingSynchronization";
+import { recordWritingSimulationEvent } from "../../lib/writingRevisionHistory";
 
 const texts = [...baseExercises, ...moreExercises, genesisExercise];
 const STORAGE_KEY = "lecture6e_writing_practice_v5";
@@ -201,6 +202,18 @@ export default function WritingPage() {
     if (canGoToStep(nextStep)) setStep(nextStep);
   }
 
+  function toggleExamMode() {
+    const nextMode = !examMode;
+    if (nextMode) {
+      recordWritingSimulationEvent({
+        levelId: "6e",
+        textTypeId: writingBrief.typeId,
+        step
+      });
+    }
+    setExamMode(nextMode);
+  }
+
   function clearWritingDraft() {
     if (!window.confirm("Effacer le travail d’écriture sauvegardé sur cet appareil ?")) return;
     [STORAGE_KEY, ...OLD_KEYS].forEach((key) => localStorage.removeItem(key));
@@ -242,7 +255,7 @@ export default function WritingPage() {
           <select value={textId} onChange={(event) => changeWritingContext(event.target.value, situationId)}>{texts.map((text) => <option key={text.id} value={text.id}>{text.title}</option>)}</select>
           <p><b>Intention de lecture :</b> {selectedText?.intention}</p>
           <div className="card green"><b>Consigne synchronisée</b><p>{writingBrief.task}</p></div>
-          <button className={examMode ? "yellow" : "green"} onClick={() => setExamMode(!examMode)}>{examMode ? "Mode simulation : feuille de notes seulement" : "Mode entraînement : texte visible"}</button>
+          <button className={examMode ? "yellow" : "green"} onClick={toggleExamMode}>{examMode ? "Mode simulation : feuille de notes seulement" : "Mode entraînement : texte visible"}</button>
           {!examMode && <details className="card" open={step <= 2}><summary><b>Voir le texte source</b></summary><div className="reader">{paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div></details>}
           {examMode && <p className="yellow"><b>Mode épreuve :</b> le texte complet est caché. Utilise ta feuille de notes.</p>}
           <StepExamNotes notes={examNotes} setNotes={setExamNotes} preciseSituation={writingBrief} />
