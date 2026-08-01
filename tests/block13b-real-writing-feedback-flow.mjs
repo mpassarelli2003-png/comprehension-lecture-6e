@@ -57,7 +57,8 @@ ok(typeof training.nextStep === "string" && training.nextStep.trim().length > 0,
 equal(training.nextStep, training.improvements[0], "la prochaine action correspond à la première priorité, sans liste supplémentaire");
 
 // 4. Les signaux attendus sont descriptifs et prudents.
-equal(training.signals.paragraphCount, 1, "le faible nombre de paragraphes est repéré");nok(training.signals.wordCount > 20, "le nombre de mots est calculé sans recopier le brouillon");
+equal(training.signals.paragraphCount, 1, "le faible nombre de paragraphes est repéré");
+ok(training.signals.wordCount > 20, "le nombre de mots est calculé sans recopier le brouillon");
 ok(training.criteria.some((item) => item.id === "coherence" && item.state === "review"), "la cohérence est proposée à la révision");
 ok(training.criteria.some((item) => item.id === "vocabulary" && item.state === "review"), "les répétitions déclenchent une relecture du vocabulaire");
 ok(training.criteria.some((item) => item.id === "sentences" && item.state === "review"), "les phrases et la ponctuation déclenchent une relecture");
