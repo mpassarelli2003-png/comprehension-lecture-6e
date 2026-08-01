@@ -8,6 +8,7 @@ import {
   readProgressRecords,
   summarizeProgress
 } from "../../lib/progressTracking";
+import WritingRevisionHistorySummary from "./WritingRevisionHistorySummary";
 
 const MODE_LABELS = { training: "Entraînement", simulation: "Simulation" };
 const STATUS_LABELS = { complete: "complètes", partial: "partielles", missing: "manquantes" };
@@ -154,6 +155,8 @@ export default function ProgressionPage() {
           </div>
         ) : <p>Les vérifications de réponse apparaîtront ici.</p>}
       </section>
+
+      <WritingRevisionHistorySummary />
     </main>
   );
 }
