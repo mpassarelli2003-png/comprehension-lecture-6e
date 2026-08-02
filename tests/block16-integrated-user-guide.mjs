@@ -84,7 +84,7 @@ for (const expected of [
 
 for (const excluded of [
   "Aucune réponse, preuve, note active, brouillon ou version finale",
-  "ni réponses de lecture, ni passages sélectionnés, ni brouillon, ni version finale",
+  "Aucun texte complet de l’élève",
   "ne remplace pas le jugement pédagogique",
   "attribuer une note, une cote ou un diagnostic"
 ]) {
