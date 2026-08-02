@@ -52,8 +52,8 @@ async function expectInteractiveNames(page) {
   expect(unnamed, `Éléments interactifs sans nom accessible :\n${unnamed.join("\n")}`).toEqual([]);
 }
 
-async function expectFormLabels(page) {
-  const unlabeled = await page.locator("input, select, textarea").evaluateAll((elements) => elements
+async function unlabeledFields(page) {
+  return page.locator("input, select, textarea").evaluateAll((elements) => elements
     .filter((element) => {
       if (element.type === "hidden") return false;
       const style = window.getComputedStyle(element);
@@ -71,6 +71,14 @@ async function expectFormLabels(page) {
       type: element.getAttribute("type"),
       placeholder: element.getAttribute("placeholder")
     })));
+}
+
+async function expectFormLabels(page) {
+  await expect.poll(async () => (await unlabeledFields(page)).length, {
+    message: "les champs visibles doivent recevoir leur libellé sémantique",
+    timeout: 4_000
+  }).toBe(0);
+  const unlabeled = await unlabeledFields(page);
   expect(unlabeled, `Champs visibles sans libellé associé :\n${JSON.stringify(unlabeled, null, 2)}`).toEqual([]);
 }
 
@@ -81,9 +89,10 @@ for (const route of PUBLIC_ROUTES) {
     expect(response?.ok(), `Réponse HTTP de ${route.path}`).toBeTruthy();
     await expect(page.getByRole("main")).toBeVisible();
     await expect(page.getByRole("heading", { level: 1, name: route.heading })).toBeVisible();
-    await expect(page.getByRole("navigation", { name: "Navigation principale" })).toBeVisible();
+    const navigation = page.getByRole("navigation", { name: "Navigation principale" });
+    await expect(navigation).toBeVisible();
     for (const name of NAVIGATION_NAMES) {
-      await expect(page.getByRole("link", { name, exact: true })).toBeVisible();
+      await expect(navigation.getByRole("link", { name, exact: true })).toBeVisible();
     }
     await expectInteractiveNames(page);
     await expectFormLabels(page);
@@ -114,7 +123,7 @@ test("la navigation principale fonctionne entièrement au clavier", async ({ pag
 
 test("les choix principaux peuvent être activés au clavier", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  const simulation = page.getByRole("button", { name: "Simulation", exact: true });
+  const simulation = page.getByRole("button", { name: /^Simulation\b/i });
   await simulation.focus();
   await page.keyboard.press("Enter");
   await expect(simulation).toHaveAttribute("aria-pressed", "true");
@@ -133,7 +142,7 @@ test("l’admin demeure protégé et les erreurs de connexion sont annoncées", 
   await page.getByLabel("Mot de passe administrateur").fill("mot-de-passe-incorrect");
   await page.getByRole("button", { name: "Ouvrir l’espace admin" }).click();
   await expect(page).toHaveURL(/error=invalid/);
-  await expect(page.getByRole("alert")).toContainText("Mot de passe incorrect");
+  await expect(page.getByText("Mot de passe incorrect.", { exact: true })).toBeVisible();
 
   await page.getByLabel("Mot de passe administrateur").fill("block17-browser-password");
   await page.getByRole("button", { name: "Ouvrir l’espace admin" }).click();
@@ -146,6 +155,7 @@ test("la sauvegarde administrative reste locale dans le navigateur", async ({ pa
   await page.goto("/admin/login", { waitUntil: "networkidle" });
   await page.getByLabel("Mot de passe administrateur").fill("block17-browser-password");
   await page.getByRole("button", { name: "Ouvrir l’espace admin" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
   await expect(page.getByRole("heading", { level: 1, name: "Tableau de bord" })).toBeVisible();
 
   const dataRequests = [];
@@ -164,7 +174,7 @@ test("la sauvegarde administrative reste locale dans le navigateur", async ({ pa
 
 test("la lecture en simulation masque les aides de contenu du module", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "Simulation", exact: true }).click();
+  await page.getByRole("button", { name: /^Simulation\b/i }).click();
   await page.getByRole("button", { name: "Choisir une lecture" }).click();
   await page.getByRole("button", { name: /Commencer en mode simulation/i }).first().click();
   await page.getByRole("button", { name: /3\. Répondre/i }).click();
