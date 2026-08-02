@@ -9,6 +9,11 @@ import {
 
 export const runtime = "nodejs";
 
+function useSecureAdminCookie() {
+  const localBrowserRecipe = process.env.ADMIN_INSECURE_COOKIE_FOR_LOCAL_TESTS === "true";
+  return process.env.NODE_ENV === "production" && !localBrowserRecipe;
+}
+
 export async function POST(request) {
   const formData = await request.formData();
   const password = String(formData.get("password") || "");
@@ -30,7 +35,7 @@ export async function POST(request) {
     value: createAdminToken(),
     httpOnly: true,
     sameSite: "strict",
-    secure: process.env.NODE_ENV === "production",
+    secure: useSecureAdminCookie(),
     path: "/",
     maxAge: ADMIN_SESSION_SECONDS
   });
