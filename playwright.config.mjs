@@ -25,7 +25,8 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       ADMIN_PASSWORD: "block17-browser-password",
-      ADMIN_SESSION_SECRET: "block17-browser-session-secret-for-ci-only"
+      ADMIN_SESSION_SECRET: "block17-browser-session-secret-for-ci-only",
+      ADMIN_INSECURE_COOKIE_FOR_LOCAL_TESTS: "true"
     }
   }
 });
