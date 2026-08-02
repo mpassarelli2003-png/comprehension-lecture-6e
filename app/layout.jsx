@@ -9,6 +9,7 @@ import "./writingMinistryFeedback.css";
 import "./writingRevisionHistory.css";
 import "./integratedJourney.css";
 import "./guide.css";
+import AccessibleFormLabels from "./AccessibleFormLabels";
 import ProgressiveAnswerGuard from "./ProgressiveAnswerGuard";
 import FormativeFeedbackPanel from "./FormativeFeedbackPanel";
 import GuidedReadingCoach from "./GuidedReadingCoach";
@@ -24,6 +25,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="fr">
       <body>
+        <AccessibleFormLabels />
         <nav className="topnav" aria-label="Navigation principale">
           <a className="homeButton" href="/">Accueil</a>
           <a className="journeyButton" href="/parcours">Parcours lecture-écriture</a>
