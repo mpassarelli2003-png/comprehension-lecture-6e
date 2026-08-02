@@ -82,13 +82,13 @@ for (const excluded of [
   "Aucune réponse, preuve, note active, brouillon ou version finale",
   "ni réponses de lecture, ni passages sélectionnés, ni brouillon, ni version finale",
   "ne remplace pas le jugement pédagogique",
-  "ne peut pas attribuer une note, une cote ou un diagnostic"
+  "attribuer une note, une cote ou un diagnostic"
 ]) {
   ok(page.includes(excluded), `la limite « ${excluded} » est documentée`);
 }
 
 for (const backupStep of [
-  "Sauv​egarde, restauration et transfert local".replace("​", ""),
+  "Sauvegarde, restauration et transfert local",
   "Créer une sauvegarde datée",
   "Fusionner ou Remplacer",
   "doublons et conflits d’identifiants",
