@@ -18,6 +18,21 @@ export default function Step5Revision({ draft, checks, setChecks, writingBrief, 
   const checkedRevisionCount = writingBrief.revisionCriteria.filter((item) => checks[revisionCheckKey(writingBrief.typeId, item.id)]).length;
   const checkedSuccessCount = writingBrief.successCriteria.filter((_, index) => checks[successCheckKey(writingBrief.typeId, index)]).length;
 
+  if (examMode) {
+    return (
+      <div>
+        <h2>Étape 5 — Je vérifie mon texte de façon autonome</h2>
+        <WritingMinistryFeedbackPanel
+          draft={draft}
+          writingBrief={writingBrief}
+          examMode
+          checks={checks}
+          setChecks={setChecks}
+        />
+      </div>
+    );
+  }
+
   return (
     <div>
       <h2>Étape 5 — Je révise mes idées et mon texte</h2>
