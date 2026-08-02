@@ -4,6 +4,7 @@ import fs from "node:fs";
 const page = fs.readFileSync(new URL("../app/guide/page.jsx", import.meta.url), "utf8");
 const layout = fs.readFileSync(new URL("../app/layout.jsx", import.meta.url), "utf8");
 const css = fs.readFileSync(new URL("../app/guide.css", import.meta.url), "utf8");
+const pageLower = page.toLowerCase();
 
 let checks = 0;
 function ok(value, message) {
@@ -13,6 +14,9 @@ function ok(value, message) {
 function equal(actual, expected, message) {
   checks += 1;
   assert.equal(actual, expected, message);
+}
+function includesText(text, message) {
+  ok(pageLower.includes(text.toLowerCase()), message);
 }
 
 ok(layout.includes('import "./guide.css"'), "la mise en forme du guide est chargée globalement");
@@ -36,7 +40,7 @@ for (const heading of [
   "Vérifications simples",
   "Principe directeur"
 ]) {
-  ok(page.includes(heading), `la section « ${heading} » est présente`);
+  includesText(heading, `la section « ${heading} » est présente`);
 }
 
 for (const role of [
@@ -44,7 +48,7 @@ for (const role of [
   "Parent ou personne accompagnatrice",
   "Élève autonome"
 ]) {
-  ok(page.includes(role), `le rôle « ${role} » est couvert`);
+  includesText(role, `le rôle « ${role} » est couvert`);
 }
 
 for (const route of ["/", "/ecriture", "/parcours", "/progression", "/admin/login"]) {
@@ -58,14 +62,14 @@ for (const moduleTitle of [
   "Progression",
   "Administration"
 ]) {
-  ok(page.includes(moduleTitle), `le module « ${moduleTitle} » possède une procédure`);
+  includesText(moduleTitle, `le module « ${moduleTitle} » possède une procédure`);
 }
 
-ok(page.includes("Il n’existe pas de route séparée /lecture"), "le guide décrit fidèlement la route réelle de lecture");
-ok(page.includes("6e année") && page.includes("Secondaire 1") && page.includes("Secondaire 2"), "les trois niveaux sont expliqués");
-ok(page.includes("simulation ne doit jamais servir à enseigner une nouvelle stratégie"), "la frontière pédagogique de la simulation est explicite");
-ok(page.includes("cinq autoévaluations ministérielles seulement"), "la simulation d’écriture est décrite correctement");
-ok(page.includes("ne corrige pas le texte, ne le réécrit pas et ne donne aucune note"), "la rétroaction d’écriture n’est pas présentée comme un correcteur");
+includesText("Il n’existe pas de route séparée /lecture", "le guide décrit fidèlement la route réelle de lecture");
+ok(pageLower.includes("6e année") && pageLower.includes("secondaire 1") && pageLower.includes("secondaire 2"), "les trois niveaux sont expliqués");
+includesText("simulation ne doit jamais servir à enseigner une nouvelle stratégie", "la frontière pédagogique de la simulation est explicite");
+includesText("cinq autoévaluations ministérielles seulement", "la simulation d’écriture est décrite correctement");
+includesText("ne corrige pas le texte, ne le réécrit pas et ne donne aucune note", "la rétroaction d’écriture n’est pas présentée comme un correcteur");
 
 for (const expected of [
   "Les notes actives servent uniquement à reprendre le travail local",
@@ -75,7 +79,7 @@ for (const expected of [
   "Effacer les données du navigateur peut supprimer le travail",
   "navigation privée"
 ]) {
-  ok(page.includes(expected), `la limite de confidentialité « ${expected} » est visible`);
+  includesText(expected, `la limite de confidentialité « ${expected} » est visible`);
 }
 
 for (const excluded of [
@@ -84,7 +88,7 @@ for (const excluded of [
   "ne remplace pas le jugement pédagogique",
   "attribuer une note, une cote ou un diagnostic"
 ]) {
-  ok(page.includes(excluded), `la limite « ${excluded} » est documentée`);
+  includesText(excluded, `la limite « ${excluded} » est documentée`);
 }
 
 for (const backupStep of [
@@ -95,12 +99,12 @@ for (const backupStep of [
   "reviennent toujours comme brouillons",
   "somme de contrôle détecte une altération accidentelle"
 ]) {
-  ok(page.includes(backupStep), `la procédure de sauvegarde couvre « ${backupStep} »`);
+  includesText(backupStep, `la procédure de sauvegarde couvre « ${backupStep} »`);
 }
 
-ok(page.includes("Ctrl + F5"), "le dépannage mentionne le rechargement complet");
-ok(page.includes("Sans sauvegarde exportée, les données locales supprimées ne peuvent pas être restaurées"), "la limite de restauration est explicite");
-ok(page.includes("Les exercices restaurés reviennent volontairement comme brouillons"), "la porte de publication après restauration est expliquée");
+includesText("Ctrl + F5", "le dépannage mentionne le rechargement complet");
+includesText("Sans sauvegarde exportée, les données locales supprimées ne peuvent pas être restaurées", "la limite de restauration est explicite");
+includesText("Les exercices restaurés reviennent volontairement comme brouillons", "la porte de publication après restauration est expliquée");
 
 ok(!page.startsWith('"use client"'), "le guide reste une page documentaire sans état client");
 const forbiddenInfrastructure = /\b(fetch|axios|XMLHttpRequest|WebSocket|EventSource|supabase|firebase|indexedDB|localStorage|sessionStorage)\b/i;
