@@ -19,7 +19,9 @@
     "test:block15": "node tests/block15-integrated-journey.mjs && node tests/block15-integration-audit.mjs",
     "test:block15b": "node tests/block15b-real-integrated-journey-flow.mjs",
     "test:block16": "node tests/block16-integrated-user-guide.mjs",
-    "prebuild": "npm run test:block5 && npm run test:block6 && npm run test:block7 && npm run test:block8 && npm run test:block9 && npm run test:block10 && npm run test:block11 && npm run test:block11b && npm run test:block12 && npm run test:block13 && npm run test:block13b && npm run test:block14 && npm run test:block15 && npm run test:block15b && npm run test:block16",
+    "test:block17:static": "node tests/block17-integration-audit.mjs",
+    "test:block17": "playwright test",
+    "prebuild": "npm run test:block5 && npm run test:block6 && npm run test:block7 && npm run test:block8 && npm run test:block9 && npm run test:block10 && npm run test:block11 && npm run test:block11b && npm run test:block12 && npm run test:block13 && npm run test:block13b && npm run test:block14 && npm run test:block15 && npm run test:block15b && npm run test:block16 && npm run test:block17:static",
     "build": "next build",
     "start": "next start"
   },
@@ -27,5 +29,8 @@
     "next": "14.2.23",
     "react": "18.3.1",
     "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1"
   }
 }
