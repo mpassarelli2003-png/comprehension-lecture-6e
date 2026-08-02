@@ -8,6 +8,7 @@ import "./localBackupRestore.css";
 import "./writingMinistryFeedback.css";
 import "./writingRevisionHistory.css";
 import "./integratedJourney.css";
+import "./guide.css";
 import ProgressiveAnswerGuard from "./ProgressiveAnswerGuard";
 import FormativeFeedbackPanel from "./FormativeFeedbackPanel";
 import GuidedReadingCoach from "./GuidedReadingCoach";
@@ -28,6 +29,7 @@ export default function RootLayout({ children }) {
           <a className="journeyButton" href="/parcours">Parcours lecture-écriture</a>
           <a className="writingButton" href="/ecriture">Volet écriture</a>
           <a className="progressButton" href="/progression">Ma progression</a>
+          <a className="guideButton" href="/guide">Guide</a>
           <a className="voiceHelpButton" href="/aide-vocale">Aide vocale IA</a>
           <a className="adminButton" href="/admin/login">Admin</a>
         </nav>
