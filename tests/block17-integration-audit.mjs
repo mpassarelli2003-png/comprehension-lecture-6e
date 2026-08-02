@@ -5,6 +5,9 @@ const packageJson = JSON.parse(fs.readFileSync(new URL("../package.json", import
 const config = fs.readFileSync(new URL("../playwright.config.mjs", import.meta.url), "utf8");
 const browserTest = fs.readFileSync(new URL("./browser/block17-browser-accessibility.spec.mjs", import.meta.url), "utf8");
 const workflow = fs.readFileSync(new URL("../.github/workflows/block17-browser-recipe.yml", import.meta.url), "utf8");
+const layout = fs.readFileSync(new URL("../app/layout.jsx", import.meta.url), "utf8");
+const accessibleLabels = fs.readFileSync(new URL("../app/AccessibleFormLabels.jsx", import.meta.url), "utf8");
+const adminLoginRoute = fs.readFileSync(new URL("../app/api/admin/login/route.js", import.meta.url), "utf8");
 
 let checks = 0;
 function ok(value, message) {
@@ -41,12 +44,23 @@ ok(browserTest.includes("expectNoHorizontalOverflow"), "le débordement horizont
 ok(browserTest.includes("pageerror") && browserTest.includes("console.error"), "les erreurs d’exécution du navigateur sont capturées");
 ok(browserTest.includes("lecture_local_exercise_backups_v1"), "la sauvegarde locale réelle est contrôlée");
 ok(browserTest.includes("fetch\", \"xhr"), "les appels de données inattendus sont surveillés");
+ok(browserTest.includes("navigation.getByRole"), "les liens de navigation sont vérifiés dans leur région propre");
+ok(browserTest.includes("/^Simulation\\b/i"), "le nom accessible complet du mode simulation est accepté");
+
+ok(layout.includes("AccessibleFormLabels"), "le correctif d’association des libellés est monté globalement");
+ok(accessibleLabels.includes('label:not([for])'), "seuls les libellés sans association sont traités");
+ok(accessibleLabels.includes('label.querySelector("input, select, textarea")'), "les libellés qui enveloppent déjà un champ sont préservés");
+ok(accessibleLabels.includes("label.htmlFor = control.id"), "une association sémantique for/id est créée");
+ok(accessibleLabels.includes("MutationObserver"), "les formulaires rendus dynamiquement sont aussi couverts");
 
 ok(config.includes("Desktop Chrome"), "la recette utilise Chromium avec un profil de navigateur réel");
 ok(config.includes("trace: \"retain-on-failure\""), "les traces sont conservées en cas d’échec");
 ok(config.includes("screenshot: \"only-on-failure\""), "les captures d’écran sont conservées en cas d’échec");
 ok(config.includes("video: \"retain-on-failure\""), "les vidéos sont conservées en cas d’échec");
 ok(config.includes("ADMIN_PASSWORD") && config.includes("ADMIN_SESSION_SECRET"), "l’admin est configuré uniquement pour la recette locale de CI");
+ok(config.includes('ADMIN_INSECURE_COOKIE_FOR_LOCAL_TESTS: "true"'), "la dérogation de cookie est limitée au serveur Playwright local");
+ok(adminLoginRoute.includes('process.env.ADMIN_INSECURE_COOKIE_FOR_LOCAL_TESTS === "true"'), "la dérogation exige une variable explicite");
+ok(adminLoginRoute.includes('process.env.NODE_ENV === "production" && !localBrowserRecipe'), "le cookie reste sécurisé en production normale");
 
 ok(workflow.includes("npx playwright install --with-deps chromium"), "Chromium et ses dépendances sont installés dans le workflow");
 ok(workflow.includes("npm run build"), "la compilation complète précède la recette navigateur");
